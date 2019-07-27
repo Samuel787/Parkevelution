@@ -6,7 +6,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -59,6 +62,7 @@ import java.util.ArrayList;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class Main_Fragment extends Fragment implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener{
 
@@ -93,7 +97,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
     @Override
     public android.view.View onCreateView(LayoutInflater inflater, ViewGroup container,
                                           Bundle savedInstanceState) {
-
+        ((MainActivity)getActivity()).setState(0);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
         fetchLastLocation();
 
@@ -117,6 +121,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
         try {
             gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
         } catch (Exception ex) {
+
         }
 
         try {
@@ -136,7 +141,13 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                     })
                     .setNegativeButton("Cancel", null)
                     .show();
-        } else {
+        }/* else if(gps_enabled){
+            //get gps location
+            LocationListener locationListener = new MyLocationListener();
+            lm.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
+
+        }*/ else {
             Task<Location> task = fusedLocationProviderClient.getLastLocation();
             task.addOnSuccessListener(new OnSuccessListener<Location>() {
                 @Override
@@ -147,8 +158,15 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                         /**
                          * the user's current location is set in MainActivity
                          * */
-                        MainActivity.setLatLonCoordinate(new LatLonCoordinate(currentLocation.getLatitude(), currentLocation.getLongitude()));
+
+                        //current location will now get updated
                         MainActivity.setStartingLatLonCoordinate(new LatLonCoordinate(currentLocation.getLatitude(), currentLocation.getLongitude()));
+
+                        //if the user did not specify any starting location -> starting location will be set to current location
+                        if(MainActivity.getLatLonCoordinate() == null){
+                            MainActivity.setLatLonCoordinate(new LatLonCoordinate(currentLocation.getLatitude(), currentLocation.getLongitude()));
+                        }
+
                         startingLocation = location;
                         //viewPager.invalidate();
                         //pagerAdapter.notifyDataSetChanged();
@@ -163,6 +181,8 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                         currentSVY21Location = convertToSVY21(currentCoord);
                         //SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
                         mapFragment.getMapAsync(Main_Fragment.this);
+                    } else {
+                        Toast.makeText(getContext(), "Last known location isn't retrieved", Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -209,8 +229,6 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-
     }
 
     //widgets
@@ -238,6 +256,17 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
             public void onClick(View v) {
                 isFirstOpened = true;
                 fetchLastLocation();
+
+                //update the starting location with this data
+                if(MainActivity.getStartingLatLonCoordinate() != null){
+                    LatLonCoordinate t =MainActivity.getStartingLatLonCoordinate();
+                    MainActivity.setLatLonCoordinate(new LatLonCoordinate(t.getLatitude(), t.getLongitude()));
+                } else {
+                    Log.v("LocationError51", "latlongcoordinate is not updated!");
+                }
+                //update the viewpager
+                viewPager.getAdapter().notifyDataSetChanged();
+
             }
         });
 
@@ -301,6 +330,9 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
         TabLayout tabLayout = mView.findViewById(R.id.tab_layout);
         tabLayout.setupWithViewPager(viewPager);
 
+        locFab.performClick();
+
+        viewPager.getAdapter().notifyDataSetChanged();
         super.onViewCreated(view, savedInstanceState);
     }
 
@@ -328,10 +360,21 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                 double lat_places, long_places;
                 lat_places = place.getLatLng().latitude;
                 long_places = place.getLatLng().longitude;
-                currentLocation.setLatitude(lat_places);
-                currentLocation.setLongitude(long_places);
+                if(currentLocation !=null){
+                    currentLocation.setLatitude(lat_places);
+                    currentLocation.setLongitude(long_places);
+                }
+
+                //((MainActivity)getActivity()).setStartingLatLonCoordinate(new LatLonCoordinate(lat_places, long_places));
                 markerPrimary = new MarkerOptions().position(place.getLatLng()).title(place.getName());
+
+                //the starting location will get updated
                 MainActivity.setLatLonCoordinate(new LatLonCoordinate(lat_places, long_places));
+
+                LatLng latLng = new LatLng(lat_places, long_places);
+                map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+
                 mapFragment.getMapAsync(Main_Fragment.this);
                 //((FragmentCanali) mMyAdapter.fr_list.get(0)).refresh();
                 //viewPager.invalidate();
@@ -364,8 +407,10 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Here");
             map.clear();
+
             map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15)); //change this number between 2-21 to control the zoom of the map
+
             //map.addMarker(markerOptions);
             if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
@@ -392,7 +437,14 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
 
         } else{
             //animates in on the map showing singapore
-            LatLng latLng = new LatLng(default_lat,  default_long);
+            LatLng latLng;
+            if(((MainActivity)getActivity()).getStartingLatLonCoordinate() == null){
+                latLng = new LatLng(default_lat,  default_long);
+            } else {
+                LatLonCoordinate latLonCoordinate = ((MainActivity)getActivity()).getStartingLatLonCoordinate();
+                latLng = new LatLng(latLonCoordinate.getLatitude(),  latLonCoordinate.getLongitude());
+            }
+
             map.clear();
             map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
@@ -401,6 +453,13 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
             currentCoord = new LatLonCoordinate(latLng.latitude, latLng.longitude);
         }
     }
+
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        fetchLastLocation();
+//        viewPager.getAdapter().notifyDataSetChanged();
+//    }
 
     private SVY21Coordinate convertToSVY21(LatLonCoordinate latLonCoordinate){
         return latLonCoordinate.asSVY21();
@@ -421,9 +480,61 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
         //name = "New Location";
         MarkerOptions options = new MarkerOptions().position(latLng).title(name);
         map.clear();
-        if(markerPrimary != null) map.addMarker(markerPrimary);
+        if(markerPrimary != null) map.addMarker(markerPrimary).setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
         map.addMarker(options).setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 
+        //zoom in on the read location -> set selected location
+        LatLng latLonCoordinate = new LatLng(MainActivity.getSelectedLatLonCoordinate().getLatitude(), MainActivity.getSelectedLatLonCoordinate().getLongitude());
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLonCoordinate, 15));
+        //map.animateCamera(CameraUpdateFactory.newLatLng(latLonCoordinate));
     }
 
+
+    /*---------- Listener class to get coordinates ------------- */
+    private class MyLocationListener implements LocationListener {
+
+        @Override
+        public void onLocationChanged(Location loc) {
+            //editLocation.setText("");
+            //pb.setVisibility(View.INVISIBLE);
+            Toast.makeText(
+                    getContext(),
+                    "Location changed: Lat: " + loc.getLatitude() + " Lng: "
+                            + loc.getLongitude(), Toast.LENGTH_SHORT).show();
+            String longitude = "Longitude: " + loc.getLongitude();
+            Log.v(TAG, longitude);
+            String latitude = "Latitude: " + loc.getLatitude();
+            Log.v(TAG, latitude);
+
+            /*------- To get city name from coordinates -------- */
+            String cityName = null;
+            Geocoder gcd = new Geocoder(getContext(), Locale.getDefault());
+            List<Address> addresses;
+            try {
+                addresses = gcd.getFromLocation(loc.getLatitude(),
+                        loc.getLongitude(), 1);
+                if (addresses.size() > 0) {
+                    System.out.println(addresses.get(0).getLocality());
+                    cityName = addresses.get(0).getLocality();
+                }
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+            String s = longitude + "\n" + latitude + "\n\nMy Current City is: "
+                    + cityName;
+            //editLocation.setText(s);
+
+            Toast.makeText(getContext(), s, Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {}
+
+        @Override
+        public void onProviderEnabled(String provider) {}
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
+    }
 }
