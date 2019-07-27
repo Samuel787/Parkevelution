@@ -302,31 +302,39 @@ public class PriceFragment extends Fragment {
                                 int b_hr = (int)timeHigh/100;
                                 int b_min = (int) timeHigh%100;
 
+                                boolean abhiCond = (currHr == a_hr && currMin < a_min) || (currHr == b_hr && currMin > b_min);
                                 if(b_hr > a_hr){
-                                    if(currHr >= a_hr || currHr <= b_hr){
-                                        //abhiPrice = x;
-                                        if(pair[1].equals("F")){
-                                            abhiPrice = "Free for the first hour";
-                                        } else if(pair[1].equals("C")){
-                                            abhiPrice = "Closed during this hour";
-                                        } else {
-                                            abhiPrice = "Car Rate: $"+pair[1].substring(1);
-                                            abhiPrice += " for the first hour";
+                                    if(currHr >= a_hr && currHr <= b_hr){
+                                        //check minutes also
+                                        if(abhiCond) continue;
+                                        else{
+                                            //abhiPrice = x;
+                                            if(pair[1].equals("F")){
+                                                abhiPrice = "Free for the first hour";
+                                            } else if(pair[1].equals("C")){
+                                                abhiPrice = "Closed during this hour";
+                                            } else {
+                                                abhiPrice = "Car Rate: $"+pair[1].substring(1);
+                                                abhiPrice += " for the first hour";
+                                            }
+                                            break;
                                         }
-                                        break;
                                     }
                                 } else {
                                     if(currHr >= a_hr && currHr <= 23 || currHr <= b_hr){
-                                        //abhiPrice = x;
-                                        if(pair[1].equals("F")){
-                                            abhiPrice = "Free for the first hour";
-                                        } else if(pair[1].equals("C")){
-                                            abhiPrice = "Closed during this hour";
-                                        } else {
-                                            abhiPrice = "Car Rate: $"+pair[1].substring(1);
-                                            abhiPrice += " for the first hour";
+                                        if(abhiCond) continue;
+                                        else {
+                                            //abhiPrice = x;
+                                            if(pair[1].equals("F")){
+                                                abhiPrice = "Free for the first hour";
+                                            } else if(pair[1].equals("C")){
+                                                abhiPrice = "Closed during this hour";
+                                            } else {
+                                                abhiPrice = "Car Rate: $"+pair[1].substring(1);
+                                                abhiPrice += " for the first hour";
+                                            }
+                                            break;
                                         }
-                                        break;
                                     }
                                 }
                             }
@@ -365,31 +373,39 @@ public class PriceFragment extends Fragment {
                                 int b_hr = (int)timeHigh/100;
                                 int b_min = (int) timeHigh%100;
 
-                                if(b_hr > a_hr){
-                                    if(currHr >= a_hr || currHr <= b_hr){
-                                        //abhiPrice = x;
-                                        if(pair[1].equals("F")){
-                                            abhiPrice = "Free for the first hour";
-                                        } else if(pair[1].equals("C")){
-                                            abhiPrice = "Closed during this hour";
-                                        } else {
-                                            abhiPrice = "Car Rate: $"+pair[1].substring(1);
-                                            abhiPrice += " for the first hour";
+                                boolean abhiCond = (currHr == a_hr && currMin < a_min) || (currHr == b_hr && currMin > b_min);
+                                if(b_hr >= a_hr){
+                                    if(currHr >= a_hr && currHr <= b_hr){
+                                        //check minutes also
+                                        if(abhiCond) continue;
+                                        else{
+                                            //abhiPrice = x;
+                                            if(pair[1].equals("F")){
+                                                abhiPrice = "Free for the first hour";
+                                            } else if(pair[1].equals("C")){
+                                                abhiPrice = "Closed during this hour";
+                                            } else {
+                                                abhiPrice = "Car Rate: $"+pair[1].substring(1);
+                                                abhiPrice += " for the first hour";
+                                            }
+                                            break;
                                         }
-                                        break;
                                     }
                                 } else {
                                     if(currHr >= a_hr && currHr <= 23 || currHr <= b_hr){
-                                        //abhiPrice = x;
-                                        if(pair[1].equals("F")){
-                                            abhiPrice = "Free for the first hour";
-                                        } else if(pair[1].equals("C")){
-                                            abhiPrice = "Closed during this hour";
-                                        } else {
-                                            abhiPrice = "Car Rate: $"+pair[1].substring(1);
-                                            abhiPrice += " for the first hour";
+                                        if(abhiCond) continue;
+                                        else {
+                                            //abhiPrice = x;
+                                            if(pair[1].equals("F")){
+                                                abhiPrice = "Free for the first hour";
+                                            } else if(pair[1].equals("C")){
+                                                abhiPrice = "Closed during this hour";
+                                            } else {
+                                                abhiPrice = "Car Rate: $"+pair[1].substring(1);
+                                                abhiPrice += " for the first hour";
+                                            }
+                                            break;
                                         }
-                                        break;
                                     }
                                 }
                             }
@@ -428,37 +444,43 @@ public class PriceFragment extends Fragment {
                                 int b_hr = (int)timeHigh/100;
                                 int b_min = (int) timeHigh%100;
 
+                                boolean abhiCond = (currHr == a_hr && currMin < a_min) || (currHr == b_hr && currMin > b_min);
                                 if(b_hr > a_hr){
-                                    if(currHr >= a_hr || currHr <= b_hr){
-                                        //abhiPrice = x;
-                                        if(pair[1].equals("F")){
-                                            abhiPrice = "Free for the first hour";
-                                        } else if(pair[1].equals("C")){
-                                            abhiPrice = "Closed during this hour";
-                                        } else {
-                                            abhiPrice = "Car Rate: $"+pair[1].substring(1);
-                                            abhiPrice += " for the first hour";
+                                    if(currHr >= a_hr && currHr <= b_hr){
+                                        //check minutes also
+                                        if(abhiCond) continue;
+                                        else{
+                                            //abhiPrice = x;
+                                            if(pair[1].equals("F")){
+                                                abhiPrice = "Free for the first hour";
+                                            } else if(pair[1].equals("C")){
+                                                abhiPrice = "Closed during this hour";
+                                            } else {
+                                                abhiPrice = "Car Rate: $"+pair[1].substring(1);
+                                                abhiPrice += " for the first hour";
+                                            }
+                                            break;
                                         }
-                                        break;
                                     }
                                 } else {
                                     if(currHr >= a_hr && currHr <= 23 || currHr <= b_hr){
-                                        //abhiPrice = x;
-                                        if(pair[1].equals("F")){
-                                            abhiPrice = "Free for the first hour";
-                                        } else if(pair[1].equals("C")){
-                                            abhiPrice = "Closed during this hour";
-                                        } else {
-                                            abhiPrice = "Car Rate: $"+pair[1].substring(1);
-                                            abhiPrice += " for the first hour";
+                                        if(abhiCond) continue;
+                                        else {
+                                            //abhiPrice = x;
+                                            if(pair[1].equals("F")){
+                                                abhiPrice = "Free for the first hour";
+                                            } else if(pair[1].equals("C")){
+                                                abhiPrice = "Closed during this hour";
+                                            } else {
+                                                abhiPrice = "Car Rate: $"+pair[1].substring(1);
+                                                abhiPrice += " for the first hour";
+                                            }
+                                            break;
                                         }
-                                        break;
                                     }
                                 }
                             }
                         }
-                        //priceInfo += carPark.getMall_weekday_rate1() +"\n" +
-                          //      carPark.getMall_weekday_rate2();
                         break;
                 }
 
