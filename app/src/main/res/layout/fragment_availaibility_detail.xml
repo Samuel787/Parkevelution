@@ -137,7 +137,7 @@
                     android:layout_marginLeft="12dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="No parking lots availability data found"
+                    android:text="No parking lot availability data found"
                     android:textSize="16sp"/>
 
 
