@@ -127,6 +127,31 @@
                 android:layout_marginRight="24dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
+                <ImageView
+                    android:id="@+id/travel_icon_proximity"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_travel"/>
+
+                <TextView
+                    android:id="@+id/travel_text_proximity"
+                    android:layout_marginLeft="12dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Estimated travel cost to carpark:\nThis feature will be available in Milestone 3! Keep waiting eagerly!"
+                    android:textSize="16sp"/>
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginLeft="24dp"
+                android:layout_marginRight="24dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
                 <ImageView
                     android:id="@+id/availability_icon_proximity"
@@ -145,38 +170,15 @@
 
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginLeft="24dp"
-                android:layout_marginRight="24dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-                <ImageView
-                    android:id="@+id/travel_icon_proximity"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_travel"/>
-
-                <TextView
-                    android:id="@+id/travel_text_proximity"
-                    android:layout_marginLeft="12dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Estimated travel cost to carpark:\nThis feature will be available in Milestone 3! Keep waiting eagerly!"
-                    android:textSize="16sp"/>
-
-            </LinearLayout>
 
             <Button
                 android:id="@+id/more_info_button"
-                android:layout_width="150dp"
+                android:layout_width="300dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_height="wrap_content"
-                android:text="More Info"
+                android:text="More Info on Lot Availability"
                 android:gravity="center"
                 android:textColor="#fff"
                 android:background="#000"
