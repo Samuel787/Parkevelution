@@ -381,7 +381,7 @@ public class PriceDetailFragment extends Fragment  implements OnMapReadyCallback
                 if(isHDB){
                     //load the spinner
                     getView().findViewById(R.id.avail_progressBar_prox).setVisibility(View.VISIBLE);
-                    Toast.makeText(getContext(), "Data might take 10 to 20 seconds to load.\nPlease wait, thank you!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Please wait for 10-20 sec while the data loads.\n\t\t\t\t\t\t\t\t\t\t\t\t\t\tThank you!", Toast.LENGTH_LONG).show();
                     //get all the data
                     dataObj = jsonParseTable1(lineChart, entireView);
                 } else {
