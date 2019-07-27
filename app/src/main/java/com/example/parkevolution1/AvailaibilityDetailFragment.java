@@ -613,7 +613,7 @@ public class AvailaibilityDetailFragment extends Fragment implements OnMapReadyC
             yValues.add(new Entry(i+1, dataset.get(i)));
         }
 
-        LineDataSet set1 = new LineDataSet(yValues, "Avail Lots data for past 24 Hours");
+        LineDataSet set1 = new LineDataSet(yValues, "Available Lots");
         set1.setFillAlpha(110);
         set1.setColor(Color.BLUE);
         set1.setLineWidth(2f);

@@ -415,7 +415,7 @@ public class ProximityDetailFragment extends Fragment implements OnMapReadyCallb
         lineChart.setDragEnabled(true);
         lineChart.setScaleEnabled(true);
         lineChart.getAxisRight().setEnabled(false);
-        lineChart.getDescription().setText("Number of hours ago");
+        lineChart.getDescription().setText("Number of Hours Ago");
         lineChart.getDescription().setTextColor(Color.BLACK);
         //lineChart.getDescription().setPosition(-5f, -40f);
         lineChart.getDescription().setTextSize(18f);
@@ -535,7 +535,7 @@ public class ProximityDetailFragment extends Fragment implements OnMapReadyCallb
             yValues.add(new Entry(i+1, dataset.get(i)));
         }
 
-        LineDataSet set1 = new LineDataSet(yValues, "Avail Lots data for past 24 Hours");
+        LineDataSet set1 = new LineDataSet(yValues, "Available Lots");
         set1.setFillAlpha(110);
         set1.setColor(Color.BLUE);
         set1.setLineWidth(2f);
@@ -948,7 +948,7 @@ public class ProximityDetailFragment extends Fragment implements OnMapReadyCallb
                                         +"\n"+"Availability: "+lotInfo.getAvail_lots()+"/"+lotInfo.getTotal_lots()+"\n";
                                 total_cplots = lotInfo.getTotal_lots();
                             }
-                            if(availability_string.equals("")) availability_string = "No availabilty data available";
+                            if(availability_string.equals("")) availability_string = "No availability data available";
                             textView.setText(availability_string);
                             Log.v("Proximity_details", "Success + availCarparks size:" + allData.size());
                         } catch (JSONException e) {

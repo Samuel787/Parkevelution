@@ -523,7 +523,7 @@ public class PriceDetailFragment extends Fragment  implements OnMapReadyCallback
                                         +"\n"+"Availability: "+lotInfo.getAvail_lots()+"/"+lotInfo.getTotal_lots()+"\n";
                                 total_cplots = lotInfo.getTotal_lots();
                             }
-                            if(availability_string.equals("")) availability_string = "No availabilty data available";
+                            if(availability_string.equals("")) availability_string = "No availability data available";
                             textView.setText(availability_string);
                             Log.v("Proximity_details", "Success + availCarparks size:" + allData.size());
                         } catch (JSONException e) {
@@ -595,7 +595,7 @@ public class PriceDetailFragment extends Fragment  implements OnMapReadyCallback
             yValues.add(new Entry(i+1, dataset.get(i)));
         }
 
-        LineDataSet set1 = new LineDataSet(yValues, "Avail Lots data for past 24 Hours");
+        LineDataSet set1 = new LineDataSet(yValues, "Available Lots");
         set1.setFillAlpha(110);
         set1.setColor(Color.BLUE);
         set1.setLineWidth(2f);
