@@ -127,7 +127,7 @@ public class PriceFragment extends Fragment {
         }
 
         //Reading data from the malls file
-        InputStream is2 = getActivity().getResources().openRawResource(R.raw.malls2);
+        InputStream is2 = getActivity().getResources().openRawResource(R.raw.malls3);
         BufferedReader reader2 = new BufferedReader(
                 new InputStreamReader(is2, Charset.forName("UTF-8"))
         );
@@ -290,6 +290,8 @@ public class PriceFragment extends Fragment {
                                 String timeRange  = pair[0];
 
                                 String[] times = timeRange.split("-");
+                                Log.v("Samuel errorrr", "Carparkname: "+ carPark.getName());
+
                                 //this is my aaaa
                                 double timeLow = Double.parseDouble(times[0]);
                                 //if(times[1].equals("0000")) times[1] = "2359";

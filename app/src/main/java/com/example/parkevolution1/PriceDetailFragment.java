@@ -392,10 +392,6 @@ public class PriceDetailFragment extends Fragment  implements OnMapReadyCallback
         });
 
 
-
-
-
-
         super.onViewCreated(view, savedInstanceState);
     }
 
