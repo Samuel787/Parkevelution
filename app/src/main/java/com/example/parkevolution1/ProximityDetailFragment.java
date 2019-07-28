@@ -752,7 +752,7 @@ public class ProximityDetailFragment extends Fragment implements OnMapReadyCallb
     private ArrayList<JSONObject> jsonParseTable1(final LineChart lineChart, final View entireView) {
         final ArrayList<JSONObject> resultObj = new ArrayList<>();
 
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, "http://27.125.169.124/avail_1.php", null,
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, "http://carparkdata.hopto.org/avail_1.php", null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
@@ -790,7 +790,7 @@ public class ProximityDetailFragment extends Fragment implements OnMapReadyCallb
     }
 
     private void jsonParseTable2(final ArrayList<JSONObject> resultObj, final LineChart lineChart, final View entireView){
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, "http://27.125.169.124/avail_2.php", null,
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, "http://carparkdata.hopto.org/avail_2.php", null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
