@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -21,6 +22,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -231,6 +233,11 @@ public class AvailaibilityDetailFragment extends Fragment implements OnMapReadyC
     final private int TOTAL_NUM_MALL = 376; //following malls2
 
 
+    private BottomSheetBehavior bottomSheetBehavior;
+    private ScrollView scrollView;
+
+
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
@@ -239,6 +246,21 @@ public class AvailaibilityDetailFragment extends Fragment implements OnMapReadyC
         //setting up the map
         mapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map_availability_detail);
         mapFragment.getMapAsync(this);
+
+        scrollView = getView().findViewById(R.id.availability_scrollview);
+        bottomSheetBehavior = BottomSheetBehavior.from(scrollView);
+
+        //setting the heights
+        //getting and setting the peek height
+        int window_height = getActivity().getWindowManager().getDefaultDisplay().getHeight();
+        int map_height = dpToPx(400);
+        bottomSheetBehavior.setPeekHeight(window_height-map_height);
+        bottomSheetBehavior.setHideable(false);
+
+
+
+
+
 
         //setting up the text fields
         TextView carparkNameTv = getView().findViewById(R.id.carpark_name_availability);
@@ -927,5 +949,11 @@ public class AvailaibilityDetailFragment extends Fragment implements OnMapReadyC
         mQueue.cancelAll("hi");
         super.onStop();
     }
+
+    private int dpToPx(int dp){
+        float density = getContext().getResources().getDisplayMetrics().density;
+        return Math.round(dp*density);
+    }
+
 }
 

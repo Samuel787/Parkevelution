@@ -17,9 +17,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     <ScrollView
+        android:id="@+id/proximity_scrollview"
         android:layout_below="@id/map_proximity_detail"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="#fff"
+        app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
+        app:elevation="10dp">
 
         <LinearLayout
             android:layout_width="match_parent"

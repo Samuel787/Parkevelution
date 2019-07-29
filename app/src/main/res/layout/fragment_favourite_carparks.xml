@@ -12,9 +12,12 @@
         android:id="@+id/editText"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
+        android:layout_marginTop="16dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:textSize="16sp"
+        android:layout_alignParentStart="true"
+        android:hint="Search your fav carpark"/>
 
     <ListView
         android:layout_width="wrap_content"

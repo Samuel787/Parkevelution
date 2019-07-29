@@ -1,5 +1,7 @@
 package com.example.parkevolution1;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -279,14 +281,39 @@ public class MainActivity extends AppCompatActivity {
     public static void setLatLonCoordinate(LatLonCoordinate latLonCoordinate) {
         MainActivity.latLonCoordinate = latLonCoordinate;
     }
-
+    boolean exit = false;
     @Override
     public void onBackPressed() {
         //control the back pressed action from here
         if(state == 0){
             //Home Page -> Exit App
-            this.finish();
-            super.onBackPressed();
+//            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialog, int which) {
+//                    switch (which){
+//                        case DialogInterface.BUTTON_POSITIVE:
+//                            exit = true;
+//                            onBackPressed();
+//                            break;
+//
+//                        case DialogInterface.BUTTON_NEGATIVE:
+//                            //No button clicked
+//                            break;
+//                    }
+//                }
+//            };
+//
+//            AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+//            builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
+//                    .setNegativeButton("No", dialogClickListener).show();
+
+          //  if(exit){
+                //Yes button clicked
+                this.finish();
+                super.onBackPressed();
+            //}
+
+
         } else if(state == 3 || state ==2 ){
             //open back home fragment
             state = 0;
