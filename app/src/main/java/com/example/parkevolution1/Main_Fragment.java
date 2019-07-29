@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -52,6 +53,8 @@ import com.google.android.libraries.places.widget.listener.PlaceSelectionListene
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -301,7 +304,8 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
 
 
     FloatingActionButton locFab;
-
+    FloatingActionButton navFab;
+    private BottomSheetBehavior sheetBehavior;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -315,19 +319,22 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
         locFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                isFirstOpened = true;
-                fetchLastLocation();
 
-                //update the starting location with this data
-                if (MainActivity.getStartingLatLonCoordinate() != null) {
-                    LatLonCoordinate t = MainActivity.getStartingLatLonCoordinate();
-                    MainActivity.setLatLonCoordinate(new LatLonCoordinate(t.getLatitude(), t.getLongitude()));
-                } else {
-                    Log.v("LocationError51", "latlongcoordinate is not updated!");
+
+                if(compClosed) {
+                    isFirstOpened = true;
+                    fetchLastLocation();
+
+                    //update the starting location with this data
+                    if (MainActivity.getStartingLatLonCoordinate() != null) {
+                        LatLonCoordinate t = MainActivity.getStartingLatLonCoordinate();
+                        MainActivity.setLatLonCoordinate(new LatLonCoordinate(t.getLatitude(), t.getLongitude()));
+                    } else {
+                        Log.v("LocationError51", "latlongcoordinate is not updated!");
+                    }
+                    //update the viewpager
+                    viewPager.getAdapter().notifyDataSetChanged();
                 }
-                //update the viewpager
-                viewPager.getAdapter().notifyDataSetChanged();
-
             }
         });
 
@@ -335,32 +342,35 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
 //        testBtn = getView().findViewById(R.id.testLocationButton);
 
 
-        FloatingActionButton navFab = getView().findViewById(R.id.fab_2);
+        navFab = getView().findViewById(R.id.fab_2);
         navFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                LatLonCoordinate latLonCoordinate = ((MainActivity) getActivity()).getLatLonCoordinate();
-                LatLonCoordinate startingLatLonCoordinate = ((MainActivity) getActivity()).getStartingLatLonCoordinate();
-                /**
-                 * Logging for error testing
-                 * */
-                Log.v("Navigation_testing", "Starting Latitude: " + startingLatLonCoordinate.getLatitude() + " Starting Longitude: " + startingLatLonCoordinate.getLongitude());
-                Log.v("Navigation_testing", "Starting Latitude: " + latLonCoordinate.getLatitude() + " Starting Longitude: " + startingLatLonCoordinate.getLongitude());
-                // Directions
-                String nav_address = "http://maps.google.com/maps?daddr="
-                        + latLonCoordinate.getLatitude() + ", "
-                        + latLonCoordinate.getLongitude();
+                if(compClosed) {
 
-                /**
-                 * Check if the person has google maps app
-                 * Open google maps if the person has google maps
-                 * If not open browser
-                 * "http://maps.google.com/maps?saddr=51.5, 0.125&daddr=51.5, 0.15"
-                 */
+                    LatLonCoordinate latLonCoordinate = ((MainActivity) getActivity()).getLatLonCoordinate();
+                    LatLonCoordinate startingLatLonCoordinate = ((MainActivity) getActivity()).getStartingLatLonCoordinate();
+                    /**
+                     * Logging for error testing
+                     * */
+                    Log.v("Navigation_testing", "Starting Latitude: " + startingLatLonCoordinate.getLatitude() + " Starting Longitude: " + startingLatLonCoordinate.getLongitude());
+                    Log.v("Navigation_testing", "Starting Latitude: " + latLonCoordinate.getLatitude() + " Starting Longitude: " + startingLatLonCoordinate.getLongitude());
+                    // Directions
+                    String nav_address = "http://maps.google.com/maps?daddr="
+                            + latLonCoordinate.getLatitude() + ", "
+                            + latLonCoordinate.getLongitude();
 
-                Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(nav_address));
-                startActivity(intent);
+                    /**
+                     * Check if the person has google maps app
+                     * Open google maps if the person has google maps
+                     * If not open browser
+                     * "http://maps.google.com/maps?saddr=51.5, 0.125&daddr=51.5, 0.15"
+                     */
+
+                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(nav_address));
+                    startActivity(intent);
+                }
             }
         });
         //mSearchText = mView.findViewById(R.id.input_search);
@@ -369,7 +379,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
         setUpPlaceAutoComplete();
         //Viewpager
         viewPager = mView.findViewById(R.id.view_pager);
-
+        sheetBehavior = BottomSheetBehavior.from(viewPager);
         fr_list.add(new ProximityFragment());
         fr_list.add(new PriceFragment());
         fr_list.add(new AvailabilityFragment());
@@ -566,10 +576,95 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
 
     }
 
+    boolean compClosed = true;
+    boolean compOpen = false;
     @Override
     public void onStart() {
         googleApiClient.connect();
+
+        //getting and setting the peek height
+        int window_height = getActivity().getWindowManager().getDefaultDisplay().getHeight();
+        int map_height = dpToPx(400);
+        sheetBehavior.setPeekHeight(window_height-map_height);
+        sheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View view, int i) {
+                //Toast.makeText(getContext(), "state: "+i, Toast.LENGTH_LONG).show();
+
+                AlphaAnimation anim = new AlphaAnimation(1.0f, 0.0f);
+                anim.setDuration(300);
+                anim.setFillAfter(true);
+                AlphaAnimation anim2 = new AlphaAnimation(0.0f, 1.0f);
+                anim2.setDuration(500);
+                anim2.setFillAfter(true);
+
+                anim.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        navFab.show();
+                        locFab.show();
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        navFab.hide();
+                        locFab.hide();
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+
+                anim2.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        navFab.show();
+                        locFab.show();
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        navFab.show();
+                        locFab.show();
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+
+                compClosed = true;
+                compOpen = false;
+                if(i== 3 && !compOpen && compClosed){
+                    compClosed = false;
+                    compOpen = true;
+                    locFab.startAnimation(anim);
+                    navFab.startAnimation(anim);
+
+                } else if(i==4 && compClosed && !compOpen){
+                    compClosed = true;
+                    compOpen = false;
+                    locFab.startAnimation(anim2);
+                    navFab.startAnimation(anim2);
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View view, float v) {
+
+            }
+        });
+
+
         super.onStart();
+    }
+
+    private int dpToPx(int dp){
+        float density = getContext().getResources().getDisplayMetrics().density;
+        return Math.round(dp*density);
     }
 
     @Override

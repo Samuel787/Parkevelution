@@ -13,6 +13,9 @@
         android:id="@+id/map_proximity_detail"
         android:name="com.google.android.gms.maps.SupportMapFragment"/>
 
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <ScrollView
         android:layout_below="@id/map_proximity_detail"
         android:layout_width="match_parent"
@@ -347,5 +350,5 @@
         </LinearLayout>
 
     </ScrollView>
-
+    </android.support.design.widget.CoordinatorLayout>
 </RelativeLayout>
