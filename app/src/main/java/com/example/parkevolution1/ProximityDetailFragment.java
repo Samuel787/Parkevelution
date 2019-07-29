@@ -4,14 +4,17 @@ import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -180,7 +183,7 @@ public class ProximityDetailFragment extends Fragment implements OnMapReadyCallb
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
         map.getUiSettings().setMyLocationButtonEnabled(false);
-
+        map.getUiSettings().setMapToolbarEnabled(false);
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -192,7 +195,7 @@ public class ProximityDetailFragment extends Fragment implements OnMapReadyCallb
             return;
         }
 
-        map.setMyLocationEnabled(true);
+        map.setMyLocationEnabled(false);
         map.clear();
         LatLng latLng = new LatLng(latitude, longitude);
         //map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
@@ -424,6 +427,36 @@ public class ProximityDetailFragment extends Fragment implements OnMapReadyCallb
                     //just display no further information available text
                     getView().findViewById(R.id.no_further_info_prox).setVisibility(View.VISIBLE);
                 }
+            }
+        });
+
+
+        FloatingActionButton navBtn = getView().findViewById(R.id.fab_2);
+        navBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                LatLonCoordinate selectedLatLonCoordinate = ((MainActivity) getActivity()).getSelectedLatLonCoordinate();
+                LatLonCoordinate startingLatLonCoordinate = ((MainActivity) getActivity()).getStartingLatLonCoordinate();
+                /**
+                 * Logging for error testing
+                 * */
+                //Log.v("Navigation_testing", "Starting Latitude: " + startingLatLonCoordinate.getLatitude() + " Starting Longitude: " + startingLatLonCoordinate.getLongitude());
+                //Log.v("Navigation_testing", "Starting Latitude: " + latLonCoordinate.getLatitude() + " Starting Longitude: " + startingLatLonCoordinate.getLongitude());
+                // Directions
+                String nav_address = "http://maps.google.com/maps?daddr="
+                        + selectedLatLonCoordinate.getLatitude() + ", "
+                        + selectedLatLonCoordinate.getLongitude();
+
+                /**
+                 * Check if the person has google maps app
+                 * Open google maps if the person has google maps
+                 * If not open browser
+                 * "http://maps.google.com/maps?saddr=51.5, 0.125&daddr=51.5, 0.15"
+                 */
+
+                Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(nav_address));
+                startActivity(intent);
             }
         });
 
@@ -803,6 +836,10 @@ public class ProximityDetailFragment extends Fragment implements OnMapReadyCallb
             @Override
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
+                if(getView()!= null){
+                    getView().findViewById(R.id.avail_progressBar_prox).setVisibility(View.GONE);
+                    getView().findViewById(R.id.no_further_info_prox).setVisibility(View.VISIBLE);
+                }
                 Log.v("Samuel", "Error");
             }
         });
@@ -824,7 +861,9 @@ public class ProximityDetailFragment extends Fragment implements OnMapReadyCallb
                             if(!hasCp){
                                 //resultObj will remain as empty -> size 0
                                 //setUpAdditionalInfo(dataObj, lineChart);
-                                getView().findViewById(R.id.avail_progressBar_prox).setVisibility(View.GONE);
+                                if(getView().findViewById(R.id.avail_progressBar_prox) != null)
+                                    getView().findViewById(R.id.avail_progressBar_prox).setVisibility(View.GONE);
+                                if(getView().findViewById(R.id.no_further_info_prox) != null)
                                 getView().findViewById(R.id.no_further_info_prox).setVisibility(View.VISIBLE);
                             } else {
                                 //package the data up and return the data in the form of AL1
@@ -842,6 +881,10 @@ public class ProximityDetailFragment extends Fragment implements OnMapReadyCallb
             @Override
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
+                if(getView()!= null){
+                    getView().findViewById(R.id.avail_progressBar_prox).setVisibility(View.GONE);
+                    getView().findViewById(R.id.no_further_info_prox).setVisibility(View.VISIBLE);
+                }
                 Log.v("Samuel", "Error");
             }
         });
