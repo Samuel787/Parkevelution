@@ -748,7 +748,7 @@ public class AvailaibilityDetailFragment extends Fragment implements OnMapReadyC
         } else if(dayOfWeek.equals("Tuesday")){
             myData += "TUE";
         } else if(dayOfWeek.equals("Wednesday")){
-            myData += "Wed";
+            myData += "WED";
         } else if(dayOfWeek.equals("Thursday")){
             myData += "THU";
         } else if(dayOfWeek.equals("Friday")) {
