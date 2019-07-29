@@ -101,9 +101,6 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                                           Bundle savedInstanceState) {
         ((MainActivity) getActivity()).setState(0);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
-        fetchLastLocation();
-
-
         if (googleApiClient == null) {
             googleApiClient = new GoogleApiClient.Builder(getContext())
                     .addConnectionCallbacks(this)
@@ -111,6 +108,10 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                     .addApi(LocationServices.API)
                     .build();
         }
+        fetchLastLocation();
+
+
+
 
 
         // Inflate the layout for this fragment
@@ -163,62 +164,119 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                     })
                     .setNegativeButton("Cancel", null)
                     .show();
-        }/* else if(gps_enabled){
-            //get gps location
-            LocationListener locationListener = new MyLocationListener();
-            lm.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
+        } else {
 
-        }*/ else {
-            Task<Location> task = fusedLocationProviderClient.getLastLocation();
-            task.addOnSuccessListener(new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    if (location != null) {
-                        currentLocation = location;
+            Location currLoc = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
 
-                        /**
-                         * the user's current location is set in MainActivity
-                         * */
+            if (currLoc != null) {
+                currentLocation = currLoc;
 
-                        //current location will now get updated
-                        MainActivity.setStartingLatLonCoordinate(new LatLonCoordinate(currentLocation.getLatitude(), currentLocation.getLongitude()));
+                /**
+                 * the user's current location is set in MainActivity
+                 * */
 
-                        //if the user did not specify any starting location -> starting location will be set to current location
-                        if (MainActivity.getLatLonCoordinate() == null) {
-                            MainActivity.setLatLonCoordinate(new LatLonCoordinate(currentLocation.getLatitude(), currentLocation.getLongitude()));
-                        }
+                //current location will now get updated
+                MainActivity.setStartingLatLonCoordinate(new LatLonCoordinate(currentLocation.getLatitude(), currentLocation.getLongitude()));
 
-                        startingLocation = location;
-                        viewPager.invalidate();
-                        pagerAdapter.notifyDataSetChanged();
-                        viewPager.getAdapter().notifyDataSetChanged();
-                        Log.v("Location_test", "Location is updated");
-
-                        //Toast.makeText(getContext(), currentLocation.getLatitude() + "" + currentLocation.getLongitude(), Toast.LENGTH_LONG).show();
-                        if (currentCoord == null) {
-                            currentCoord = new LatLonCoordinate(default_lat, default_long);
-
-                        }
-                        currentSVY21Location = convertToSVY21(currentCoord);
-                        //SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-                        mapFragment.getMapAsync(Main_Fragment.this);
-                    } else {
-                        if (MainActivity.getStartingLatLonCoordinate() == null) {
-                            MainActivity.setStartingLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
-                        }
-
-                        if (MainActivity.getLatLonCoordinate() == null) {
-                            MainActivity.setLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
-                        }
-
-                        if (MainActivity.getSelectedLatLonCoordinate() == null) {
-                            MainActivity.setSelectedLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
-                        }
-                        Toast.makeText(getContext(), "Last known location isn't retrieved", Toast.LENGTH_LONG).show();
-                    }
+                //if the user did not specify any starting location -> starting location will be set to current location
+                if (MainActivity.getLatLonCoordinate() == null) {
+                    MainActivity.setLatLonCoordinate(new LatLonCoordinate(currentLocation.getLatitude(), currentLocation.getLongitude()));
                 }
-            });
+
+                startingLocation = currLoc;
+                viewPager.invalidate();
+                pagerAdapter.notifyDataSetChanged();
+                viewPager.getAdapter().notifyDataSetChanged();
+                Log.v("Location_test", "Location is updated");
+
+                //Toast.makeText(getContext(), currentLocation.getLatitude() + "" + currentLocation.getLongitude(), Toast.LENGTH_LONG).show();
+                if (currentCoord == null) {
+                    currentCoord = new LatLonCoordinate(default_lat, default_long);
+
+                }
+                currentSVY21Location = convertToSVY21(currentCoord);
+                //SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+                mapFragment.getMapAsync(Main_Fragment.this);
+            } else {
+                if (MainActivity.getStartingLatLonCoordinate() == null) {
+                    MainActivity.setStartingLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
+                }
+
+                if (MainActivity.getLatLonCoordinate() == null) {
+                    MainActivity.setLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
+                }
+
+                if (MainActivity.getSelectedLatLonCoordinate() == null) {
+                    MainActivity.setSelectedLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
+                }
+                Toast.makeText(getContext(), "Last known location isn't retrieved", Toast.LENGTH_LONG).show();
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ //           Task<Location> task = fusedLocationProviderClient.getLastLocation();
+//            task.addOnSuccessListener(new OnSuccessListener<Location>() {
+//                @Override
+//                public void onSuccess(Location location) {
+//                    if (location != null) {
+//                        currentLocation = location;
+//
+//                        /**
+//                         * the user's current location is set in MainActivity
+//                         * */
+//
+//                        //current location will now get updated
+//                        MainActivity.setStartingLatLonCoordinate(new LatLonCoordinate(currentLocation.getLatitude(), currentLocation.getLongitude()));
+//
+//                        //if the user did not specify any starting location -> starting location will be set to current location
+//                        if (MainActivity.getLatLonCoordinate() == null) {
+//                            MainActivity.setLatLonCoordinate(new LatLonCoordinate(currentLocation.getLatitude(), currentLocation.getLongitude()));
+//                        }
+//
+//                        startingLocation = location;
+//                        viewPager.invalidate();
+//                        pagerAdapter.notifyDataSetChanged();
+//                        viewPager.getAdapter().notifyDataSetChanged();
+//                        Log.v("Location_test", "Location is updated");
+//
+//                        //Toast.makeText(getContext(), currentLocation.getLatitude() + "" + currentLocation.getLongitude(), Toast.LENGTH_LONG).show();
+//                        if (currentCoord == null) {
+//                            currentCoord = new LatLonCoordinate(default_lat, default_long);
+//
+//                        }
+//                        currentSVY21Location = convertToSVY21(currentCoord);
+//                        //SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+//                        mapFragment.getMapAsync(Main_Fragment.this);
+//                    } else {
+//                        if (MainActivity.getStartingLatLonCoordinate() == null) {
+//                            MainActivity.setStartingLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
+//                        }
+//
+//                        if (MainActivity.getLatLonCoordinate() == null) {
+//                            MainActivity.setLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
+//                        }
+//
+//                        if (MainActivity.getSelectedLatLonCoordinate() == null) {
+//                            MainActivity.setSelectedLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
+//                        }
+//                        Toast.makeText(getContext(), "Last known location isn't retrieved", Toast.LENGTH_LONG).show();
+//                    }
+//                }
+//            });
         }
     }
 
@@ -239,7 +297,11 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
     private ViewPager viewPager;
     private SupportMapFragment mapFragment;
     ArrayList<Fragment> fr_list = new ArrayList<>();
-    Button testBtn;
+    //Button testBtn;
+
+
+    FloatingActionButton locFab;
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -249,7 +311,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
 
         View mView = getView();
 
-        FloatingActionButton locFab = getView().findViewById(R.id.fab_1);
+        locFab = getView().findViewById(R.id.fab_1);
         locFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -270,7 +332,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
         });
 
 
-        testBtn = getView().findViewById(R.id.testLocationButton);
+//        testBtn = getView().findViewById(R.id.testLocationButton);
 
 
         FloatingActionButton navFab = getView().findViewById(R.id.fab_2);
@@ -420,6 +482,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
     private LatLonCoordinate currentCoord;
     private boolean isFirstOpened = true; //for the very first marker
 
+    private boolean isCurrLocSel = true;
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
@@ -436,34 +499,6 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
             return;
         }
 
-        map.setMyLocationEnabled(true);
-
-        testBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
-
-                Location currLoc = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-                if(currLoc !=null){
-                    LatLng latLng = new LatLng(currLoc.getLatitude(), currLoc.getLongitude());
-                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(currLoc.getLatitude(), currLoc.getLongitude()), 16);
-                    map.animateCamera(cameraUpdate, 250, null);
-                    MarkerOptions options = new MarkerOptions().position(latLng).title("Here");
-                    map.addMarker(options).setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
-                }
-            }
-        });
-
-
         //Map Tool Bar is the default google map's toolbar that opens up the navigation direcitons to that location as well as google maps location on google maps
         /**
          * This is replaced with custom floating action button
@@ -471,7 +506,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
         map.getUiSettings().setMapToolbarEnabled(false);
 
 
-    /*
+        //currentLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
         if (currentLocation != null) {
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Here");
@@ -523,7 +558,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
             currentCoord = new LatLonCoordinate(latLng.latitude, latLng.longitude);
             viewPager.getAdapter().notifyDataSetChanged();
         }
-        */
+
     }
 
     @Override
@@ -577,7 +612,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        testBtn.performClick();
+        locFab.performClick();
     }
 
     @Override

@@ -10,13 +10,6 @@
         tools:context=".Main_Fragment">
 
 
-    <Button
-        android:id="@+id/testLocationButton"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="120dp"
-        android:layout_marginLeft="50dp"/>
-
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
