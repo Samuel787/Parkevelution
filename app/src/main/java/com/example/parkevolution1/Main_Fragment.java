@@ -108,7 +108,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                     .addApi(LocationServices.API)
                     .build();
         }
-        fetchLastLocation();
+        //fetchLastLocation();
 
 
 
@@ -209,7 +209,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                 if (MainActivity.getSelectedLatLonCoordinate() == null) {
                     MainActivity.setSelectedLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
                 }
-                Toast.makeText(getContext(), "Last known location isn't retrieved", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Your current location isn't available yet", Toast.LENGTH_LONG).show();
             }
 
 
@@ -395,7 +395,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
         TabLayout tabLayout = mView.findViewById(R.id.tab_layout);
         tabLayout.setupWithViewPager(viewPager);
 
-        locFab.performClick();
+        //locFab.performClick();
 
         try {
             viewPager.getAdapter().notifyDataSetChanged();
@@ -459,12 +459,17 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
 
                 //the starting location will get updated
                 MainActivity.setLatLonCoordinate(new LatLonCoordinate(lat_places, long_places));
-
+                map.clear();
                 LatLng latLng = new LatLng(lat_places, long_places);
                 map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+                MarkerOptions options = new MarkerOptions().position(latLng).title(place.getName());
+                map.addMarker(options).setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
 
-                mapFragment.getMapAsync(Main_Fragment.this);
+
+
+
+                //mapFragment.getMapAsync(Main_Fragment.this);
                 //((FragmentCanali) mMyAdapter.fr_list.get(0)).refresh();
                 //viewPager.invalidate();
                 viewPager.getAdapter().notifyDataSetChanged();
@@ -509,7 +514,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
         //currentLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
         if (currentLocation != null) {
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-            MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Here");
+            //MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Here");
             map.clear();
 
             map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
