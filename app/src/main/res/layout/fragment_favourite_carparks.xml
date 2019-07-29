@@ -14,7 +14,8 @@
         android:layout_marginRight="20dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:hint="Search a carpark"/>
 
     <ListView
         android:layout_width="wrap_content"
