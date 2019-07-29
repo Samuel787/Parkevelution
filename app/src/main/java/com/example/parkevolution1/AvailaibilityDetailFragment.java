@@ -921,5 +921,11 @@ public class AvailaibilityDetailFragment extends Fragment implements OnMapReadyC
         mQueue.add(request);
     }
 
+
+    @Override
+    public void onStop() {
+        mQueue.cancelAll("hi");
+        super.onStop();
+    }
 }
 

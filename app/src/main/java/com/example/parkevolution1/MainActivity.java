@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         state = 0;
 
-        /*
+
         double default_lat = 1.2906, default_long = 103.8530;
         //update all the lat longs if they are null to prevent any errors
         if(startingLatLonCoordinate == null){
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(selectedLatLonCoordinate == null){
             selectedLatLonCoordinate = new LatLonCoordinate(default_lat, default_long);
-        }*/
+        }
 
         //initialise the sharedpreferences for the favourite carparks
         SharedPreferences hdbPrefs = getSharedPreferences("HDBFavouritePrefs", MODE_PRIVATE);
@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
         Main_Fragment main_fragment = new Main_Fragment();
         getSupportFragmentManager().beginTransaction()
                 .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
-                .replace(R.id.main_fragment, main_fragment)
+                .replace(R.id.main_fragment, main_fragment, "myMainFragment")
                 .addToBackStack(null)
                 .commit();
 
@@ -226,14 +226,14 @@ public class MainActivity extends AppCompatActivity {
                         FindCarFragment findCarFragment = new FindCarFragment();
                         getSupportFragmentManager().beginTransaction()
                                 .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
-                                .replace(R.id.main_fragment, findCarFragment)
+                                .add(R.id.main_fragment, findCarFragment)
                                 //.addToBackStack(null)
                                 .commit();
                     } else {
                         ParkedHereFragment parkedHereFragment = new ParkedHereFragment();
                         getSupportFragmentManager().beginTransaction()
                                 .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
-                                .replace(R.id.main_fragment, parkedHereFragment)
+                                .add(R.id.main_fragment, parkedHereFragment)
                                 //.addToBackStack(null)
                                 .commit();
                     }
@@ -287,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
             //Home Page -> Exit App
             this.finish();
             super.onBackPressed();
-        } else {
+        } else if(state == 3 || state ==2 ){
             //open back home fragment
             state = 0;
             Main_Fragment main_fragment = new Main_Fragment();
@@ -297,5 +297,21 @@ public class MainActivity extends AppCompatActivity {
                     //.addToBackStack(null)
                     .commit();
         }
+        else {
+            state = 0;
+            super.onBackPressed();
+        }
+
+        /*else {
+            //open back home fragment
+            state = 0;
+            Main_Fragment main_fragment = new Main_Fragment();
+            getSupportFragmentManager().beginTransaction()
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .replace(R.id.main_fragment, main_fragment)
+                    //.addToBackStack(null)
+                    .commit();
+        }*/
+       // super.onBackPressed();
     }
 }

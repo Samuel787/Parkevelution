@@ -901,4 +901,10 @@ public class PriceDetailFragment extends Fragment  implements OnMapReadyCallback
         });
         mQueue.add(request);
     }
+
+    @Override
+    public void onStop() {
+        mQueue.cancelAll("hi");
+        super.onStop();
+    }
 }

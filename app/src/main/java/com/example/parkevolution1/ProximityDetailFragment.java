@@ -228,6 +228,9 @@ public class ProximityDetailFragment extends Fragment implements OnMapReadyCallb
         isCarparkHDB = bundle.getBoolean("isHDB");
 
         currentPosition = new LatLonCoordinate(MainActivity.getStartingLatLonCoordinate().getLatitude(), MainActivity.getStartingLatLonCoordinate().getLongitude());
+
+
+
         //duration = getDurationInfo(currentPosition, new LatLonCoordinate(latitude, longitude));
 
         //get the  correct shared preference

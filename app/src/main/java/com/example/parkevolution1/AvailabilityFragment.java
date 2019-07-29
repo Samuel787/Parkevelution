@@ -393,7 +393,7 @@ public class AvailabilityFragment extends Fragment {
                     availaibilityDetailFragment.setArguments(bundle);
                     getActivity().getSupportFragmentManager().beginTransaction()
                             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                            .replace(R.id.main_fragment, availaibilityDetailFragment)
+                            .add(R.id.main_fragment, availaibilityDetailFragment)
                             .addToBackStack(null)
                             .commit();
                 }

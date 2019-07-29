@@ -332,7 +332,7 @@ public class ProximityFragment extends Fragment {
                     proximityDetailFragment.setArguments(bundle);
                     getActivity().getSupportFragmentManager().beginTransaction()
                             .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
-                            .replace(R.id.main_fragment, proximityDetailFragment)
+                            .add(R.id.main_fragment, proximityDetailFragment)
                             .addToBackStack(null)
                             .commit();
                 }

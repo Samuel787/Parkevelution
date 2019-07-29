@@ -100,17 +100,26 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
         ((MainActivity)getActivity()).setState(0);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
         fetchLastLocation();
-
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_main, container, false);
     }
 
     private void fetchLastLocation() {
-        //readWeatherData();
 
         //request for location permission if permission isn't given
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
+            if(MainActivity.getStartingLatLonCoordinate() == null){
+                MainActivity.setStartingLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
+            }
+
+            if(MainActivity.getLatLonCoordinate() == null){
+                MainActivity.setLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
+            }
+
+            if(MainActivity.getSelectedLatLonCoordinate() == null){
+                MainActivity.setSelectedLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
+            }
             return;
         }
         //check if location is turned on
@@ -168,8 +177,8 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                         }
 
                         startingLocation = location;
-                        //viewPager.invalidate();
-                        //pagerAdapter.notifyDataSetChanged();
+                        viewPager.invalidate();
+                        pagerAdapter.notifyDataSetChanged();
                         viewPager.getAdapter().notifyDataSetChanged();
                         Log.v("Location_test", "Location is updated");
 
@@ -182,47 +191,21 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                         //SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
                         mapFragment.getMapAsync(Main_Fragment.this);
                     } else {
+                        if(MainActivity.getStartingLatLonCoordinate() == null){
+                            MainActivity.setStartingLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
+                        }
+
+                        if(MainActivity.getLatLonCoordinate() == null){
+                            MainActivity.setLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
+                        }
+
+                        if(MainActivity.getSelectedLatLonCoordinate() == null){
+                            MainActivity.setSelectedLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
+                        }
                         Toast.makeText(getContext(), "Last known location isn't retrieved", Toast.LENGTH_LONG).show();
                     }
                 }
             });
-        }
-    }
-
-    private List<WeatherSample> weatherSamples = new ArrayList<>();
-
-    private void readWeatherData() {
-        InputStream is = getActivity().getResources().openRawResource(R.raw.data);
-        BufferedReader reader = new BufferedReader(
-                new InputStreamReader(is, Charset.forName("UTF-8"))
-        );
-        String line = "";
-        try {
-            while ((line = reader.readLine()) != null) {
-
-                //split by ","
-                String[] tokens = line.split(",");
-
-                //Read the data
-                WeatherSample sample = new WeatherSample();
-                sample.setMonth(tokens[0]);
-                if (tokens[1].length() > 0) {
-                    sample.setRainfall(Double.parseDouble(tokens[1]));
-                } else {
-                    sample.setRainfall(0);
-                }
-                if (tokens.length >= 3 && tokens[2].length() > 0) {
-                    sample.setSunHours(Integer.parseInt(tokens[2]));
-                } else {
-                    sample.setSunHours(0);
-                }
-                weatherSamples.add(sample);
-
-                Log.d("MyActivity", "just created" + sample);
-            }
-        } catch (IOException e) {
-            Log.wtf("MyActivity", "Error reading data file on line" + line, e);
-            e.printStackTrace();
         }
     }
 
@@ -245,6 +228,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
     ArrayList<Fragment> fr_list = new ArrayList<>();
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+
         mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
@@ -332,7 +316,25 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
 
         locFab.performClick();
 
-        viewPager.getAdapter().notifyDataSetChanged();
+        try{
+            viewPager.getAdapter().notifyDataSetChanged();
+        } catch(NullPointerException e){
+            e.printStackTrace();
+        }
+
+        if(MainActivity.getStartingLatLonCoordinate() == null){
+            MainActivity.setStartingLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
+        }
+
+        if(MainActivity.getLatLonCoordinate() == null){
+            MainActivity.setLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
+        }
+
+        if(MainActivity.getSelectedLatLonCoordinate() == null){
+            MainActivity.setSelectedLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
+        }
+
+
         super.onViewCreated(view, savedInstanceState);
     }
 
@@ -434,7 +436,8 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
             currentCoord = new LatLonCoordinate(latLng.latitude, latLng.longitude);
 
             //method to update the distances and display them on the fragment
-
+            //viewPager.getAdapter().notifyDataSetChanged();
+            viewPager.setAdapter(pagerAdapter);
         } else{
             //animates in on the map showing singapore
             LatLng latLng;
@@ -451,6 +454,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
             map.addMarker(new MarkerOptions().position(latLng).title("Singapore"));
             //map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
             currentCoord = new LatLonCoordinate(latLng.latitude, latLng.longitude);
+            viewPager.getAdapter().notifyDataSetChanged();
         }
     }
 

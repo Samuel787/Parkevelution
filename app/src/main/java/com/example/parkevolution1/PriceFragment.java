@@ -590,7 +590,7 @@ public class PriceFragment extends Fragment {
                     priceDetailFragment.setArguments(bundle);
                     getActivity().getSupportFragmentManager().beginTransaction()
                             .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
-                            .replace(R.id.main_fragment, priceDetailFragment)
+                            .add(R.id.main_fragment, priceDetailFragment)
                             .addToBackStack(null)
                             .commit();
                 }
