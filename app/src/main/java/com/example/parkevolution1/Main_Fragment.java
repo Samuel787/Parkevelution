@@ -22,6 +22,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.libraries.places.api.Places;
 
@@ -51,6 +52,7 @@ import com.google.android.libraries.places.widget.listener.PlaceSelectionListene
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -64,7 +66,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class Main_Fragment extends Fragment implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener{
+public class Main_Fragment extends Fragment implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     static GoogleMap map;
     /**
@@ -97,9 +99,20 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
     @Override
     public android.view.View onCreateView(LayoutInflater inflater, ViewGroup container,
                                           Bundle savedInstanceState) {
-        ((MainActivity)getActivity()).setState(0);
+        ((MainActivity) getActivity()).setState(0);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
         fetchLastLocation();
+
+
+        if (googleApiClient == null) {
+            googleApiClient = new GoogleApiClient.Builder(getContext())
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+
+
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_main, container, false);
     }
@@ -109,15 +122,15 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
         //request for location permission if permission isn't given
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
-            if(MainActivity.getStartingLatLonCoordinate() == null){
+            if (MainActivity.getStartingLatLonCoordinate() == null) {
                 MainActivity.setStartingLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
             }
 
-            if(MainActivity.getLatLonCoordinate() == null){
+            if (MainActivity.getLatLonCoordinate() == null) {
                 MainActivity.setLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
             }
 
-            if(MainActivity.getSelectedLatLonCoordinate() == null){
+            if (MainActivity.getSelectedLatLonCoordinate() == null) {
                 MainActivity.setSelectedLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
             }
             return;
@@ -172,7 +185,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                         MainActivity.setStartingLatLonCoordinate(new LatLonCoordinate(currentLocation.getLatitude(), currentLocation.getLongitude()));
 
                         //if the user did not specify any starting location -> starting location will be set to current location
-                        if(MainActivity.getLatLonCoordinate() == null){
+                        if (MainActivity.getLatLonCoordinate() == null) {
                             MainActivity.setLatLonCoordinate(new LatLonCoordinate(currentLocation.getLatitude(), currentLocation.getLongitude()));
                         }
 
@@ -183,7 +196,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                         Log.v("Location_test", "Location is updated");
 
                         //Toast.makeText(getContext(), currentLocation.getLatitude() + "" + currentLocation.getLongitude(), Toast.LENGTH_LONG).show();
-                        if(currentCoord == null){
+                        if (currentCoord == null) {
                             currentCoord = new LatLonCoordinate(default_lat, default_long);
 
                         }
@@ -191,15 +204,15 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                         //SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
                         mapFragment.getMapAsync(Main_Fragment.this);
                     } else {
-                        if(MainActivity.getStartingLatLonCoordinate() == null){
+                        if (MainActivity.getStartingLatLonCoordinate() == null) {
                             MainActivity.setStartingLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
                         }
 
-                        if(MainActivity.getLatLonCoordinate() == null){
+                        if (MainActivity.getLatLonCoordinate() == null) {
                             MainActivity.setLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
                         }
 
-                        if(MainActivity.getSelectedLatLonCoordinate() == null){
+                        if (MainActivity.getSelectedLatLonCoordinate() == null) {
                             MainActivity.setSelectedLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
                         }
                         Toast.makeText(getContext(), "Last known location isn't retrieved", Toast.LENGTH_LONG).show();
@@ -226,6 +239,8 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
     private ViewPager viewPager;
     private SupportMapFragment mapFragment;
     ArrayList<Fragment> fr_list = new ArrayList<>();
+    Button testBtn;
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
@@ -242,8 +257,8 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                 fetchLastLocation();
 
                 //update the starting location with this data
-                if(MainActivity.getStartingLatLonCoordinate() != null){
-                    LatLonCoordinate t =MainActivity.getStartingLatLonCoordinate();
+                if (MainActivity.getStartingLatLonCoordinate() != null) {
+                    LatLonCoordinate t = MainActivity.getStartingLatLonCoordinate();
                     MainActivity.setLatLonCoordinate(new LatLonCoordinate(t.getLatitude(), t.getLongitude()));
                 } else {
                     Log.v("LocationError51", "latlongcoordinate is not updated!");
@@ -254,21 +269,25 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
             }
         });
 
+
+        testBtn = getView().findViewById(R.id.testLocationButton);
+
+
         FloatingActionButton navFab = getView().findViewById(R.id.fab_2);
         navFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                LatLonCoordinate latLonCoordinate = ((MainActivity)getActivity()).getLatLonCoordinate();
+                LatLonCoordinate latLonCoordinate = ((MainActivity) getActivity()).getLatLonCoordinate();
                 LatLonCoordinate startingLatLonCoordinate = ((MainActivity) getActivity()).getStartingLatLonCoordinate();
                 /**
                  * Logging for error testing
                  * */
-                Log.v("Navigation_testing", "Starting Latitude: "+startingLatLonCoordinate.getLatitude() + " Starting Longitude: "+startingLatLonCoordinate.getLongitude());
-                Log.v("Navigation_testing", "Starting Latitude: "+latLonCoordinate.getLatitude()+ " Starting Longitude: "+startingLatLonCoordinate.getLongitude());
+                Log.v("Navigation_testing", "Starting Latitude: " + startingLatLonCoordinate.getLatitude() + " Starting Longitude: " + startingLatLonCoordinate.getLongitude());
+                Log.v("Navigation_testing", "Starting Latitude: " + latLonCoordinate.getLatitude() + " Starting Longitude: " + startingLatLonCoordinate.getLongitude());
                 // Directions
                 String nav_address = "http://maps.google.com/maps?daddr="
-                        + latLonCoordinate.getLatitude() +", "
+                        + latLonCoordinate.getLatitude() + ", "
                         + latLonCoordinate.getLongitude();
 
                 /**
@@ -316,21 +335,21 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
 
         locFab.performClick();
 
-        try{
+        try {
             viewPager.getAdapter().notifyDataSetChanged();
-        } catch(NullPointerException e){
+        } catch (NullPointerException e) {
             e.printStackTrace();
         }
 
-        if(MainActivity.getStartingLatLonCoordinate() == null){
+        if (MainActivity.getStartingLatLonCoordinate() == null) {
             MainActivity.setStartingLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
         }
 
-        if(MainActivity.getLatLonCoordinate() == null){
+        if (MainActivity.getLatLonCoordinate() == null) {
             MainActivity.setLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
         }
 
-        if(MainActivity.getSelectedLatLonCoordinate() == null){
+        if (MainActivity.getSelectedLatLonCoordinate() == null) {
             MainActivity.setSelectedLatLonCoordinate(new LatLonCoordinate(default_lat, default_long));
         }
 
@@ -338,20 +357,20 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
         super.onViewCreated(view, savedInstanceState);
     }
 
-    private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(new LatLng(-40,-168), new LatLng(71,136));
-    final private String apiKey  = "AIzaSyCQqUq9JUexPU9MF3c3KYhRUY42sBoiC6w";
+    private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(new LatLng(-40, -168), new LatLng(71, 136));
+    final private String apiKey = "AIzaSyCQqUq9JUexPU9MF3c3KYhRUY42sBoiC6w";
     private PlacesClient placesClient;
 
 
     private void init() {
         // Initialize Places.
-        if(!Places.isInitialized())
+        if (!Places.isInitialized())
             Places.initialize(getActivity(), apiKey);
         // Create a new Places client instance.
         placesClient = Places.createClient(getActivity());
     }
 
-    private void setUpPlaceAutoComplete(){
+    private void setUpPlaceAutoComplete() {
         places_fragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.places_autocomplete_fragment);
         places_fragment.setPlaceFields(placeFields);
         places_fragment.setCountry("SG"); //added this line
@@ -362,11 +381,11 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
                 double lat_places, long_places;
                 lat_places = place.getLatLng().latitude;
                 long_places = place.getLatLng().longitude;
-                if(currentLocation !=null){
-                    try{
+                if (currentLocation != null) {
+                    try {
                         currentLocation.setLatitude(lat_places);
                         currentLocation.setLongitude(long_places);
-                    } catch(NullPointerException e){
+                    } catch (NullPointerException e) {
                         e.printStackTrace();
                         Toast.makeText(getContext(), "A Location exception has occurred. Please restart the app", Toast.LENGTH_LONG).show();
                     }
@@ -391,7 +410,7 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
 
             @Override
             public void onError(@NonNull Status status) {
-                Toast.makeText(getContext(), ""+status.getStatusMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "" + status.getStatusMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -405,12 +424,54 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
         map.getUiSettings().setMyLocationButtonEnabled(false);
+
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+
+        map.setMyLocationEnabled(true);
+
+        testBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+
+                Location currLoc = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+                if(currLoc !=null){
+                    LatLng latLng = new LatLng(currLoc.getLatitude(), currLoc.getLongitude());
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(currLoc.getLatitude(), currLoc.getLongitude()), 16);
+                    map.animateCamera(cameraUpdate, 250, null);
+                    MarkerOptions options = new MarkerOptions().position(latLng).title("Here");
+                    map.addMarker(options).setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                }
+            }
+        });
+
+
         //Map Tool Bar is the default google map's toolbar that opens up the navigation direcitons to that location as well as google maps location on google maps
         /**
          * This is replaced with custom floating action button
          * */
         map.getUiSettings().setMapToolbarEnabled(false);
 
+
+    /*
         if (currentLocation != null) {
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Here");
@@ -462,9 +523,24 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
             currentCoord = new LatLonCoordinate(latLng.latitude, latLng.longitude);
             viewPager.getAdapter().notifyDataSetChanged();
         }
+        */
     }
 
-//    @Override
+    @Override
+    public void onStart() {
+        googleApiClient.connect();
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        googleApiClient.disconnect();
+        super.onStop();
+    }
+
+
+
+    //    @Override
 //    public void onStart() {
 //        super.onStart();
 //        fetchLastLocation();
@@ -497,6 +573,16 @@ public class Main_Fragment extends Fragment implements OnMapReadyCallback, Googl
         LatLng latLonCoordinate = new LatLng(MainActivity.getSelectedLatLonCoordinate().getLatitude(), MainActivity.getSelectedLatLonCoordinate().getLongitude());
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLonCoordinate, 15));
         //map.animateCamera(CameraUpdateFactory.newLatLng(latLonCoordinate));
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        testBtn.performClick();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
     }
 
 

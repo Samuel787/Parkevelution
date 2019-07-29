@@ -177,7 +177,7 @@ public class ProximityDetailFragment extends Fragment implements OnMapReadyCallb
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-        map.getUiSettings().setMyLocationButtonEnabled(false);
+        map.getUiSettings().setMyLocationButtonEnabled(true);
 
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -222,6 +222,9 @@ public class ProximityDetailFragment extends Fragment implements OnMapReadyCallb
         longitude = bundle.getDouble("y-coord");
         data_cat = bundle.getString("data-cat");
         mQueue = Volley.newRequestQueue(getContext());
+
+
+
 
         //Retrieving out favourite carpark information
         fileLineNum = bundle.getInt("fileLineNum");
