@@ -398,7 +398,6 @@ public class ProximityFragment extends Fragment {
                         default:
                                 break;
                     }
-
                     proximityDetailFragment.setArguments(bundle);
                     getActivity().getSupportFragmentManager().beginTransaction()
                             .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)

@@ -19,6 +19,17 @@ public class CarPark {
     private String mall_sunday_24rate;
     private String mall_sunday_rates;
 
+    public double getHourly_price() {
+        return hourly_price;
+    }
+
+    public void setHourly_price(double hourly_price) {
+        this.hourly_price = hourly_price;
+    }
+
+    private double hourly_price;
+
+
 
     public String getMall_weekday_24rate() {
         return mall_weekday_24rate;

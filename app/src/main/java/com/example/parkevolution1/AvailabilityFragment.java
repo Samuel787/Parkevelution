@@ -12,9 +12,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +39,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -48,6 +51,7 @@ public class AvailabilityFragment extends Fragment {
     private RequestQueue mQueue;
     public static SVY21Coordinate currentSVY21Location;
     private CarPark[] cpArray = new CarPark[50];
+
     private List<CarPark> carParks = new ArrayList<>();
 
     public AvailabilityFragment() {
@@ -64,6 +68,8 @@ public class AvailabilityFragment extends Fragment {
     //Button getJsonButton;
     //TextView txtJson;
     private ListView listView;
+    private Spinner spinner;
+    private static final String[] paths = {"Default", "Highest Availability", "Lowest Availability"};
 
     private MyAvailabilityAdapter myAvailabilityAdapter;
     @Override
@@ -79,6 +85,39 @@ public class AvailabilityFragment extends Fragment {
         }
 
         listView = getView().findViewById(R.id.availabilityListView);
+
+        spinner = getView().findViewById(R.id.spinner);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, paths);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+        spinner.setSelection(0, true);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                switch (i){
+                    case 0:
+                            //update the list view
+                            listView.setAdapter(new MyAvailabilityAdapter(getContext(), availCarParks));
+                        break;
+                    case 1:
+                            listView.setAdapter(new MyAvailabilityAdapter(getContext(), availCarParksDescending));
+                        break;
+                    case 2:
+                        listView.setAdapter(new MyAvailabilityAdapter(getContext(), availCarParksAscending));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
 
         if (currentSVY21Location != null) {
             calculateNearByCarparks();
@@ -102,6 +141,7 @@ public class AvailabilityFragment extends Fragment {
     public void onPause() {
         availCarParks.clear();
         super.onPause();
+        spinner.setSelection(0);
     }
 
     private void calculateNearByCarparks() {
@@ -174,6 +214,10 @@ public class AvailabilityFragment extends Fragment {
     }
 
     ArrayList<AvailCarPark> availCarParks = new ArrayList<>();
+    ArrayList<AvailCarPark> availCarParksAscending = new ArrayList<>();
+    ArrayList<AvailCarPark> availCarParksDescending = new ArrayList<>();
+
+
     ArrayList<AvailCarPark> allAvailCarParks = new ArrayList<>();
 
     private void jsonParse() {
@@ -220,9 +264,35 @@ public class AvailabilityFragment extends Fragment {
 
                             //call function to display the list of data in the listview
                             for (int i = 0; i < availCarParks.size(); i++) {
-                                Log.v("AvailCarparks", availCarParks.get(i).toString());
+                                availCarParksDescending.add(availCarParks.get(i));
+                                availCarParksAscending.add(availCarParks.get(i));
                             }
-                            Log.v("Samuel", "Success + availCarparks size:" + availCarParks.size());
+
+                            Collections.sort(availCarParksAscending, new Comparator<AvailCarPark>() {
+                                @Override
+                                public int compare(AvailCarPark availCarPark, AvailCarPark t1) {
+                                    if(availCarPark.getAvailLots() > t1.availLots){
+                                        return 1;
+                                    } else if(availCarPark.getAvailLots() < t1.getAvailLots()){
+                                        return -1;
+                                    } else {
+                                        return 0;
+                                    }
+                                }
+                            });
+
+                            Collections.sort(availCarParksDescending, new Comparator<AvailCarPark>() {
+                                @Override
+                                public int compare(AvailCarPark availCarPark, AvailCarPark t1) {
+                                    if(availCarPark.getAvailLots() > t1.availLots){
+                                        return -1;
+                                    } else if(availCarPark.getAvailLots() < t1.getAvailLots()){
+                                        return 1;
+                                    } else {
+                                        return 0;
+                                    }
+                                }
+                            });
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
