@@ -14,9 +14,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -28,6 +30,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,6 +44,8 @@ public class PriceFragment extends Fragment {
     public SVY21Coordinate currentSVY21Location;
     private List<CarPark> carParks = new ArrayList<>();
     private CarPark[] cpArray = new CarPark[50];
+    private CarPark[] cpArrayReverse = new CarPark[50];
+    private CarPark[] cpArrayOriginal = new CarPark[50];
 
     public PriceFragment() {
         // Required empty public constructor
@@ -54,6 +59,9 @@ public class PriceFragment extends Fragment {
     }
 
     private ListView listView;
+    private Spinner spinner;
+    private static final String[] paths = {"Cheapest First", "Cheapest Last"};
+    private boolean ascending = true; //the carparks are arranged in ascending order
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -68,6 +76,53 @@ public class PriceFragment extends Fragment {
         }
 
         listView = getView().findViewById(R.id.priceListView);
+        spinner = getView().findViewById(R.id.spinner);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, paths);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+        spinner.setSelection(0, true);
+
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                switch (i){
+                    case 0:
+                        if(ascending != true){
+                            ascending = true;
+                            //update the list view
+                            cpArray = Arrays.copyOf(cpArrayOriginal, cpArrayOriginal.length);
+                            listView.setAdapter(new MyPriceAdapter(getContext(), cpArray));
+                        }
+                        break;
+                    case 1:
+                        if(ascending == true){
+                            ascending = false;
+                            //update the list view
+                            cpArray = Arrays.copyOf(cpArrayReverse, cpArrayReverse.length);
+                            listView.setAdapter(new MyPriceAdapter(getContext(), cpArray));
+
+                            for(CarPark c: cpArray){
+                                Log.v("Reverse-test", c.getAddress());
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+
+
+
+
 
         if(currentSVY21Location != null){
             readCarParkData();
@@ -218,6 +273,12 @@ public class PriceFragment extends Fragment {
             double rounded_dist = Math.round(dist*10)/10.0;
             cpArray[i].setDist(rounded_dist);
         }
+
+
+        cpArrayReverse = Arrays.copyOf(cpArray, cpArray.length);
+        Collections.reverse(Arrays.asList(cpArrayReverse));
+        cpArrayOriginal = Arrays.copyOf(cpArray, cpArray.length);
+
 
         //update the list view
         MyPriceAdapter myProximityAdapter = new MyPriceAdapter(getContext(), cpArray);
@@ -598,5 +659,11 @@ public class PriceFragment extends Fragment {
 
             return convertView;
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        spinner.setSelection(0);
     }
 }
