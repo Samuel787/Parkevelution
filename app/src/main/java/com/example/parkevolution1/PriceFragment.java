@@ -404,7 +404,12 @@ public class PriceFragment extends Fragment {
                             } else if((currCp.getMall_saturday_24rate()).equals("C")){
                                 currCp.setHourly_price(closed_val);
                             } else {
-                                currCp.setHourly_price(Double.parseDouble(currCp.getMall_saturday_24rate()));
+                                try{
+                                    currCp.setHourly_price(Double.parseDouble(currCp.getMall_saturday_24rate()));
+                                } catch (NumberFormatException e){
+                                    e.printStackTrace();
+                                    currCp.setHourly_price(closed_val);
+                                }
                             }
                         } else {
                             String[] timeComponents = str.split(":");
@@ -473,9 +478,16 @@ public class PriceFragment extends Fragment {
                             } else if((currCp.getMall_weekday_24rate()).equals("C")){
                                 currCp.setHourly_price(closed_val);
                             } else {
-                                currCp.setHourly_price(Double.parseDouble(currCp.getMall_weekday_24rate()));
+                                try{
+                                    currCp.setHourly_price(Double.parseDouble(currCp.getMall_weekday_24rate()));
+                                } catch(NumberFormatException e){
+                                    e.printStackTrace();
+                                    currCp.setHourly_price(closed_val);
+                                }
+
                             }
                         } else {
+                            Log.v("MyBugProb", currCp.getName());
                             String[] timeComponents = str.split(":");
                             double currHr = Double.parseDouble(timeComponents[0]);
                             double currMin = Double.parseDouble(timeComponents[1]);

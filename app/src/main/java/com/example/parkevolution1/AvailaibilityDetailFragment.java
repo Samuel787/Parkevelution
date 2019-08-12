@@ -647,7 +647,6 @@ public class AvailaibilityDetailFragment extends Fragment implements OnMapReadyC
             }
         });
 
-
         //the Y-axis
         YAxis yAxis = lineChart.getAxisLeft();
         yAxis.setTextSize(16f);

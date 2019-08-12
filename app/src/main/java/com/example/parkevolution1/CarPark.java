@@ -29,6 +29,38 @@ public class CarPark {
 
     private double hourly_price;
 
+    public int getAvail_lots() {
+        return avail_lots;
+    }
+
+    public void setAvail_lots(int avail_lots) {
+        this.avail_lots = avail_lots;
+    }
+
+    private int avail_lots;
+
+
+    public int getTotal_lots() {
+        return total_lots;
+    }
+
+    public void setTotal_lots(int total_lots) {
+        this.total_lots = total_lots;
+    }
+
+    private int total_lots;
+
+
+    public String getLot_type() {
+        return lot_type;
+    }
+
+    public void setLot_type(String lot_type) {
+        this.lot_type = lot_type;
+    }
+
+    private String lot_type;
+
 
 
     public String getMall_weekday_24rate() {

@@ -18,7 +18,17 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.model.LatLng;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,6 +37,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -59,6 +70,8 @@ public class RecommendedFragment extends Fragment {
         //setting the currentSVY21Location for testing purposes
         LatLonCoordinate testCoordinate = new LatLonCoordinate(1.344261, 103.720750);
         currentSVY21Location = testCoordinate.asSVY21();
+
+        mQueue = Volley.newRequestQueue(getContext());
 
         LatLonCoordinate realCoordinate = MainActivity.getLatLonCoordinate();
         if(realCoordinate != null){
@@ -169,7 +182,6 @@ public class RecommendedFragment extends Fragment {
                 carPark.setMall_sunday_24rate(tokens[12]);
                 carPark.setMall_sunday_rates(tokens[13]);
 
-
                 carPark.setIsHDB(false);
                 carPark.setFileLineNum(lineCounterMalls);
 
@@ -182,6 +194,9 @@ public class RecommendedFragment extends Fragment {
         }
     }
 
+    //Abhishek Constants
+    final private double price_threshold = 1;
+    final private double distance_threshold = 80;
 
     //this method can be called once initially and everytime the current location FAB is pressed
     private void displayCarparks_price(){
@@ -219,12 +234,365 @@ public class RecommendedFragment extends Fragment {
             cpArray[i].setDist(rounded_dist);
         }
 
+        //setting the price for these 50 carparks
+        setHourlyPriceForSelectedCarparks(cpArray);
+
+        //setting the availability if info is avail
+        setAvailabilityInformation(cpArray);
+
+        //insert Abhishek's sorting algorithm for recommended carpark
+        Arrays.sort(cpArray, new Comparator<CarPark>() {
+            @Override
+            public int compare(CarPark carPark, CarPark t1) {
+                if((Math.abs(carPark.getHourly_price()) <= price_threshold) && (Math.abs(carPark.getDist() - t1.getDist())) < distance_threshold){
+                    if(carPark.getDataCategory() == CarPark.DataCategory.HDB && t1.getDataCategory() == CarPark.DataCategory.HDB){
+                        if(carPark.getAvail_lots() <= t1.getAvail_lots()){
+                            return 1;
+                        } else {
+                            return -1;
+                        }
+                    } else {
+                        if(carPark.getDist() <= t1.getDist()){
+                            return -1;
+                        } else {
+                            return 1;
+                        }
+                    }
+                } else if((Math.abs(carPark.getHourly_price() - t1.getHourly_price()) <= price_threshold) && (Math.abs(carPark.getDist() - t1.getDist()) >= distance_threshold)){
+                    return 1;
+                } else if((Math.abs(carPark.getHourly_price() - t1.getHourly_price()) > price_threshold)){
+                    if(carPark.getHourly_price() < t1.getHourly_price()) return -1;
+                    else return 1;
+                } else {
+                    return 0;
+                }
+            }
+        });
+
         //update the list view
         MyReccAdapter myReccAdapter = new MyReccAdapter(getContext(), cpArray);
         listView.setAdapter(myReccAdapter);
+    }
+
+
+    private void setHourlyPriceForSelectedCarparks(CarPark[] carparks){
+
+        for(int i=0; i<carparks.length; i++){
+            CarPark currCp = carparks[i];
+            if (currCp.getDataCategory() == CarPark.DataCategory.HDB) {
+                if(currCp.getHdb_car_parking_rate().equals("$0.60 per half-hour")){
+                    currCp.setHourly_price(1.2);
+                } else if(currCp.getHdb_car_parking_rate().equals("$1.20 per half-hour")){
+                    currCp.setHourly_price(2.4);
+                }
+            } else {
+                //a shopping mall carpark
+
+                //start
+                Calendar calendar = Calendar.getInstance();
+                int day = calendar.get(Calendar.DAY_OF_WEEK);
+                int closed_val = 1000000;
+                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                String str = sdf.format(new Date());
+                Log.v("ABHISHEK BOI", str);
+                switch (day) {
+                    case Calendar.SUNDAY:
+                        if(!(currCp.getMall_sunday_24rate()).equals("")){
+                            if((currCp.getMall_sunday_24rate()).equals("F")){
+                                currCp.setHourly_price(0);
+                            } else if((currCp.getMall_sunday_24rate()).equals("C")){
+                                currCp.setHourly_price(closed_val);
+                            } else {
+                                try{
+                                    currCp.setHourly_price(Double.parseDouble(currCp.getMall_sunday_24rate()));
+                                } catch(NumberFormatException e){
+                                    currCp.setHourly_price(closed_val);
+                                    e.printStackTrace();
+                                }
+                            }
+                        } else {
+                            String[] timeComponents = str.split(":");
+                            double currHr = Double.parseDouble(timeComponents[0]);
+                            double currMin = Double.parseDouble(timeComponents[1]);
+                            double currAbhiTime = currHr*100+currMin;
+
+                            String[] tokens = currCp.getMall_sunday_rates().split(";");
+                            for(String x : tokens){
+                                String[] pair = x.split(":");
+                                String timeRange  = pair[0];
+
+                                String[] times = timeRange.split("-");
+
+
+                                //this is my aaaa
+                                double timeLow = Double.parseDouble(times[0]);
+                                //if(times[1].equals("0000")) times[1] = "2359";
+                                //this is my bbbb
+                                double timeHigh = Double.parseDouble(times[1]);
+
+                                int a_hr = (int)timeLow/100;
+                                int a_min = (int)timeLow%100;
+
+                                int b_hr = (int)timeHigh/100;
+                                int b_min = (int) timeHigh%100;
+
+                                boolean abhiCond = (currHr == a_hr && currMin < a_min) || (currHr == b_hr && currMin > b_min);
+                                if(b_hr > a_hr){
+                                    if(currHr >= a_hr && currHr <= b_hr){
+                                        //check minutes also
+                                        if(abhiCond) continue;
+                                        else{
+                                            //abhiPrice = x;
+                                            if(pair[1].equals(" F")){
+                                                currCp.setHourly_price(0);
+                                            } else if(pair[1].equals(" C")){
+                                                currCp.setHourly_price(closed_val);
+                                            } else {
+                                                currCp.setHourly_price(Double.parseDouble(pair[1].substring(1)));
+                                            }
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    if(currHr >= a_hr && currHr <= 23 || currHr <= b_hr){
+                                        if(abhiCond) continue;
+                                        else {
+                                            //abhiPrice = x;
+                                            if(pair[1].equals(" F")){
+                                                currCp.setHourly_price(0);
+                                            } else if(pair[1].equals(" C")){
+                                                currCp.setHourly_price(closed_val);
+                                            } else {
+                                                currCp.setHourly_price(Double.parseDouble(pair[1].substring(1)));
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case Calendar.SATURDAY:
+                        if(!(currCp.getMall_saturday_24rate()).equals("")){
+                            if((currCp.getMall_saturday_24rate()).equals("F")){
+                                currCp.setHourly_price(0);
+                            } else if((currCp.getMall_saturday_24rate()).equals("C")){
+                                currCp.setHourly_price(closed_val);
+                            } else {
+                                currCp.setHourly_price(Double.parseDouble(currCp.getMall_saturday_24rate()));
+                            }
+                        } else {
+                            String[] timeComponents = str.split(":");
+                            double currHr = Double.parseDouble(timeComponents[0]);
+                            double currMin = Double.parseDouble(timeComponents[1]);
+                            double currAbhiTime = currHr*100+currMin;
+
+                            String[] tokens = currCp.getMall_saturday_rates().split(";");
+                            for(String x : tokens){
+                                String[] pair = x.split(":");
+                                String timeRange  = pair[0];
+
+                                String[] times = timeRange.split("-");
+                                //this is my aaaa
+                                double timeLow = Double.parseDouble(times[0]);
+                                //if(times[1].equals("0000")) times[1] = "2359";
+                                //this is my bbbb
+                                double timeHigh = Double.parseDouble(times[1]);
+
+                                int a_hr = (int)timeLow/100;
+                                int a_min = (int)timeLow%100;
+
+                                int b_hr = (int)timeHigh/100;
+                                int b_min = (int) timeHigh%100;
+
+                                boolean abhiCond = (currHr == a_hr && currMin < a_min) || (currHr == b_hr && currMin > b_min);
+                                if(b_hr >= a_hr){
+                                    if(currHr >= a_hr && currHr <= b_hr){
+                                        //check minutes also
+                                        if(abhiCond) continue;
+                                        else{
+                                            //abhiPrice = x;
+                                            if(pair[1].equals(" F")){
+                                                currCp.setHourly_price(0);
+                                            } else if(pair[1].equals(" C")){
+                                                currCp.setHourly_price(closed_val);
+                                            } else {
+                                                currCp.setHourly_price(Double.parseDouble(pair[1].substring(1)));
+                                            }
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    if(currHr >= a_hr && currHr <= 23 || currHr <= b_hr){
+                                        if(abhiCond) continue;
+                                        else {
+                                            //abhiPrice = x;
+                                            if(pair[1].equals(" F")){
+                                                currCp.setHourly_price(0);
+                                            } else if(pair[1].equals(" C")){
+                                                currCp.setHourly_price(closed_val);
+                                            } else {
+                                                currCp.setHourly_price(Double.parseDouble(pair[1].substring(1)));
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    default: //Weekday
+                        if(!(currCp.getMall_weekday_24rate()).equals("")){
+                            if((currCp.getMall_weekday_24rate()).equals("F")){
+                                currCp.setHourly_price(0);
+                            } else if((currCp.getMall_weekday_24rate()).equals("C")){
+                                currCp.setHourly_price(closed_val);
+                            } else {
+                                try{
+                                    currCp.setHourly_price(Double.parseDouble(currCp.getMall_weekday_24rate()));
+                                } catch(NumberFormatException e){
+                                    currCp.setHourly_price(closed_val);
+                                }
+
+                            }
+                        } else {
+                            String[] timeComponents = str.split(":");
+                            double currHr = Double.parseDouble(timeComponents[0]);
+                            double currMin = Double.parseDouble(timeComponents[1]);
+                            double currAbhiTime = currHr*100+currMin;
+
+                            String[] tokens = currCp.getMall_weekday_rates().split(";");
+                            for(String x : tokens){
+                                String[] pair = x.split(":");
+                                String timeRange  = pair[0];
+
+                                String[] times = timeRange.split("-");
+                                //this is my aaaa
+                                double timeLow = Double.parseDouble(times[0]);
+                                //if(times[1].equals("0000")) times[1] = "2359";
+                                //this is my bbbb
+                                double timeHigh = Double.parseDouble(times[1]);
+
+                                int a_hr = (int)timeLow/100;
+                                int a_min = (int)timeLow%100;
+
+                                int b_hr = (int)timeHigh/100;
+                                int b_min = (int) timeHigh%100;
+
+                                boolean abhiCond = (currHr == a_hr && currMin < a_min) || (currHr == b_hr && currMin > b_min);
+                                if(b_hr > a_hr){
+                                    if(currHr >= a_hr && currHr <= b_hr){
+                                        //check minutes also
+                                        if(abhiCond) continue;
+                                        else{
+                                            //abhiPrice = x;
+                                            if(pair[1].equals(" F")){
+                                                currCp.setHourly_price(0);
+                                            } else if(pair[1].equals(" C")){
+                                                currCp.setHourly_price(closed_val);
+                                            } else {
+                                                currCp.setHourly_price(Double.parseDouble(pair[1].substring(1)));
+                                            }
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    if(currHr >= a_hr && currHr <= 23 || currHr <= b_hr){
+                                        if(abhiCond) continue;
+                                        else {
+                                            //abhiPrice = x;
+                                            if(pair[1].equals(" F")){
+                                                currCp.setHourly_price(0);
+                                            } else if(pair[1].equals(" C")){
+                                                currCp.setHourly_price(closed_val);
+                                            } else {
+                                                currCp.setHourly_price(Double.parseDouble(pair[1].substring(1)));
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                }
+
+                //end
+            }
+            carparks[i] = currCp;
+        }
 
 
     }
+    private String availability_url = "https://api.data.gov.sg/v1/transport/carpark-availability";
+    private RequestQueue mQueue;
+
+    ArrayList<CarPark> allAvailCarParks = new ArrayList<>();
+
+    private void setAvailabilityInformation(final CarPark[] cpArray){
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, availability_url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        //parsing happens here
+                        try {
+                            Log.v("Samuel", "Success-3");
+                            JSONArray jsonArrayItems = response.getJSONArray("items");
+                            JSONObject jsonObjectMain = jsonArrayItems.getJSONObject(0);
+                            JSONArray jsonArrayCarpark_Data = jsonObjectMain.getJSONArray("carpark_data");
+                            for (int i = 0; i < jsonArrayCarpark_Data.length(); i++) {
+                                CarPark availCarPark1 = new CarPark();
+                                JSONObject jsonObjectCarpark = jsonArrayCarpark_Data.getJSONObject(i);
+                                JSONArray jsonArrayInfo = jsonObjectCarpark.getJSONArray("carpark_info");
+                                JSONObject jsonObjectInfo = jsonArrayInfo.getJSONObject(0);
+
+                                availCarPark1.setName(jsonObjectCarpark.getString("carpark_number"));
+                                availCarPark1.setAvail_lots(jsonObjectInfo.getInt("lots_available"));
+                                availCarPark1.setTotal_lots(jsonObjectInfo.getInt("total_lots"));
+                                availCarPark1.setLot_type(jsonObjectInfo.getString("lot_type"));
+                                allAvailCarParks.add(availCarPark1);
+                            }
+
+                            for (int i = 0; i < cpArray.length; i++) {
+                                if(cpArray[i].getDataCategory() == CarPark.DataCategory.SHOPPING_MALL){
+                                    //SHOPPING MALL DATA
+                                    continue;
+                                } else {
+                                    //HDB DATA
+                                    String name = cpArray[i].getName();
+                                    int max = allAvailCarParks.size();
+                                    cpArray[i].setAvail_lots(0);
+                                    cpArray[i].setTotal_lots(0);
+                                    cpArray[i].setLot_type("N");
+                                    for (int j = 0; j < max; j++) {
+                                        CarPark availCarPark = allAvailCarParks.get(j);
+                                        if (name.equals(availCarPark.getName())) {
+                                            cpArray[i].setTotal_lots(availCarPark.getTotal_lots());
+                                            cpArray[i].setAvail_lots(availCarPark.getAvail_lots());
+                                            cpArray[i].setLot_type(availCarPark.getLot_type());
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+                Log.v("Samuel", "Error");
+            }
+        });
+
+        mQueue.add(request);
+    }
+
+
+
 
     class MyReccAdapter extends ArrayAdapter<CarPark> {
         Context context;

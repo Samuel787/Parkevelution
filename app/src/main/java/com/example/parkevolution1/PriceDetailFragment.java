@@ -605,7 +605,7 @@ public class PriceDetailFragment extends Fragment  implements OnMapReadyCallback
         xAxis.setTextSize(16f);
         xAxis.setTextColor(Color.BLACK);
         xAxis.setDrawAxisLine(true);
-        xAxis.setDrawGridLines(false);
+        xAxis.setDrawGridLines(true);
         xAxis.setAxisLineWidth(2f);
         xAxis.setAxisLineColor(Color.BLACK);
 
