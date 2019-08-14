@@ -194,9 +194,9 @@ public class RecommendedFragment extends Fragment {
         }
     }
 
-    //Abhishek Constants
-    final private double price_threshold = 1;
-    final private double distance_threshold = 80;
+    //Abhishek Constants -> 10 cents per 50 metres
+    final private double price_threshold = 0.2;
+    final private double distance_threshold = 50;
 
     //this method can be called once initially and everytime the current location FAB is pressed
     private void displayCarparks_price(){
@@ -240,7 +240,90 @@ public class RecommendedFragment extends Fragment {
         //setting the availability if info is avail
         setAvailabilityInformation(cpArray);
 
+        //calculate recommendability index for each carpark
+        setReccIndex(cpArray);
+
         //insert Abhishek's sorting algorithm for recommended carpark
+
+        /**
+         *  Sorting method I
+         * */
+
+
+        Arrays.sort(cpArray, new Comparator<CarPark>() {
+            @Override
+            public int compare(CarPark carPark, CarPark t1) {
+                //check for availability first
+                if(carPark.getDataCategory() == CarPark.DataCategory.HDB && t1.getDataCategory() == CarPark.DataCategory.HDB && carPark.getAvail_lots() == 0 && t1.getAvail_lots() == 0){
+                        //both have 0 availabile lots -> sort by distance
+                        if(carPark.getDist() > t1.getDist()){
+                            return 1;
+                        } else if(carPark.getDist() < t1.getDist()){
+                            return -1;
+                        } else {
+                            return 0;
+                        }
+                } else {
+                    if(carPark.getDataCategory() == CarPark.DataCategory.HDB && t1.getDataCategory() == CarPark.DataCategory.SHOPPING_MALL && carPark.getAvail_lots() == 0){
+                        //put shopping mall in front
+                        return 1;
+                    } else if(carPark.getDataCategory() == CarPark.DataCategory.SHOPPING_MALL && t1.getDataCategory() == CarPark.DataCategory.HDB && t1.getAvail_lots() == 0){
+                        //retain shopping mall in front
+                        return -1;
+                    } else if(carPark.getDist() - t1.getDist() <= 0 && carPark.getHourly_price() <= t1.getHourly_price()){
+                        //nearer and cheaper
+                        return -1; //obviously don't swap
+                    } else if(carPark.getDist() - t1.getDist() > 0 && carPark.getHourly_price() > t1.getHourly_price()){
+                        //further and more expensive
+                        return 1; //obviously swap
+                    } else if(carPark.getDist() - t1.getDist() <=0 && carPark.getHourly_price() > t1.getHourly_price() ){
+                        //nearer but more expensive -> compare the opportunity cost first
+                        double dist_diff = Math.abs(carPark.getDist() - t1.getDist());
+                        if(dist_diff/distance_threshold * price_threshold + t1.getHourly_price() < carPark.getHourly_price()){
+                            return 1; //swap
+                        } else if(dist_diff/distance_threshold * price_threshold + t1.getHourly_price() > carPark.getHourly_price()){
+                            return -1; //don't swap. The cheaper price isn't worth it
+                        } else {
+                            return 0;
+                        }
+                    } else if(carPark.getDist() - t1.getDist() >= 0 && carPark.getHourly_price() < t1.getHourly_price()){
+                        //further but cheaper
+                        double dist_diff = Math.abs(carPark.getDist() - t1.getDist());
+                        if(dist_diff/distance_threshold * price_threshold + carPark.getHourly_price() < t1.getHourly_price()){
+                            return 1; //swap
+                        } else if(dist_diff/distance_threshold * price_threshold + carPark.getHourly_price() > t1.getHourly_price()){
+                            return -1; //don't swap. The cheaper price isn't worth it
+                        } else {
+                            return 0;
+                        }
+                    } else {
+                        return 0;
+                    }
+                }
+            }
+        });
+
+
+        /**
+         * Sorting method II
+         * */
+        /*
+        Arrays.sort(cpArray, new Comparator<CarPark>() {
+            @Override
+            public int compare(CarPark carPark, CarPark t1) {
+                if(carPark.getReccIndex() < t1.getReccIndex()){
+                    return 1;
+                } else if (carPark.getReccIndex() > t1.getReccIndex()){
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+        });
+        */
+
+
+        /*
         Arrays.sort(cpArray, new Comparator<CarPark>() {
             @Override
             public int compare(CarPark carPark, CarPark t1) {
@@ -268,15 +351,36 @@ public class RecommendedFragment extends Fragment {
                 }
             }
         });
-
+        */
         //update the list view
         MyReccAdapter myReccAdapter = new MyReccAdapter(getContext(), cpArray);
         listView.setAdapter(myReccAdapter);
     }
 
 
-    private void setHourlyPriceForSelectedCarparks(CarPark[] carparks){
+    private void setReccIndex(CarPark[] carparks){
+        for(int i=0; i<carparks.length; i++){
+            double avail;
+            double dist;
+            double price;
 
+            if(carparks[i].getDataCategory() == CarPark.DataCategory.HDB){
+                //get absolute availability of that carpark
+                avail = carparks[i].getAvail_lots();
+            } else {
+                //set the availability of that carpark to be 1 (DEFAULT VAL)
+                avail = 1;
+            }
+
+            dist = carparks[i].getDist();
+            price = carparks[i].getHourly_price();
+
+            //setting the index of the carpark
+            carparks[i].setReccIndex(avail/(price*dist));
+        }
+    }
+
+    private void setHourlyPriceForSelectedCarparks(CarPark[] carparks){
         for(int i=0; i<carparks.length; i++){
             CarPark currCp = carparks[i];
             if (currCp.getDataCategory() == CarPark.DataCategory.HDB) {
@@ -679,9 +783,9 @@ public class RecommendedFragment extends Fragment {
                                         if(abhiCond) continue;
                                         else{
                                             //abhiPrice = x;
-                                            if(pair[1].equals("F")){
+                                            if(pair[1].equals(" F")){
                                                 abhiPrice = "Free for the first hour";
-                                            } else if(pair[1].equals("C")){
+                                            } else if(pair[1].equals(" C")){
                                                 abhiPrice = "Closed during this hour";
                                             } else {
                                                 abhiPrice = "Car Rate: $"+pair[1].substring(1);
@@ -695,9 +799,9 @@ public class RecommendedFragment extends Fragment {
                                         if(abhiCond) continue;
                                         else {
                                             //abhiPrice = x;
-                                            if(pair[1].equals("F")){
+                                            if(pair[1].equals(" F")){
                                                 abhiPrice = "Free for the first hour";
-                                            } else if(pair[1].equals("C")){
+                                            } else if(pair[1].equals(" C")){
                                                 abhiPrice = "Closed during this hour";
                                             } else {
                                                 abhiPrice = "Car Rate: $"+pair[1].substring(1);
@@ -750,9 +854,9 @@ public class RecommendedFragment extends Fragment {
                                         if(abhiCond) continue;
                                         else{
                                             //abhiPrice = x;
-                                            if(pair[1].equals("F")){
+                                            if(pair[1].equals(" F")){
                                                 abhiPrice = "Free for the first hour";
-                                            } else if(pair[1].equals("C")){
+                                            } else if(pair[1].equals(" C")){
                                                 abhiPrice = "Closed during this hour";
                                             } else {
                                                 abhiPrice = "Car Rate: $"+pair[1].substring(1);
@@ -766,9 +870,9 @@ public class RecommendedFragment extends Fragment {
                                         if(abhiCond) continue;
                                         else {
                                             //abhiPrice = x;
-                                            if(pair[1].equals("F")){
+                                            if(pair[1].equals(" F")){
                                                 abhiPrice = "Free for the first hour";
-                                            } else if(pair[1].equals("C")){
+                                            } else if(pair[1].equals(" C")){
                                                 abhiPrice = "Closed during this hour";
                                             } else {
                                                 abhiPrice = "Car Rate: $"+pair[1].substring(1);
@@ -821,9 +925,9 @@ public class RecommendedFragment extends Fragment {
                                         if(abhiCond) continue;
                                         else{
                                             //abhiPrice = x;
-                                            if(pair[1].equals("F")){
+                                            if(pair[1].equals(" F")){
                                                 abhiPrice = "Free for the first hour";
-                                            } else if(pair[1].equals("C")){
+                                            } else if(pair[1].equals(" C")){
                                                 abhiPrice = "Closed during this hour";
                                             } else {
                                                 abhiPrice = "Car Rate: $"+pair[1].substring(1);
@@ -837,9 +941,9 @@ public class RecommendedFragment extends Fragment {
                                         if(abhiCond) continue;
                                         else {
                                             //abhiPrice = x;
-                                            if(pair[1].equals("F")){
+                                            if(pair[1].equals(" F")){
                                                 abhiPrice = "Free for the first hour";
-                                            } else if(pair[1].equals("C")){
+                                            } else if(pair[1].equals(" C")){
                                                 abhiPrice = "Closed during this hour";
                                             } else {
                                                 abhiPrice = "Car Rate: $"+pair[1].substring(1);
@@ -967,6 +1071,4 @@ public class RecommendedFragment extends Fragment {
             return convertView;
         }
     }
-
-
 }

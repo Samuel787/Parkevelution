@@ -62,6 +62,15 @@ public class CarPark {
     private String lot_type;
 
 
+    private double reccIndex;
+
+    public double getReccIndex() {
+        return reccIndex;
+    }
+
+    public void setReccIndex(double reccIndex) {
+        this.reccIndex = reccIndex;
+    }
 
     public String getMall_weekday_24rate() {
         return mall_weekday_24rate;
