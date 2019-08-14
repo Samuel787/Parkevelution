@@ -847,14 +847,6 @@ public class AvailaibilityDetailFragment extends Fragment implements OnMapReadyC
     }
 
 
-
-
-
-
-
-
-
-
     private void setUpAdditionalInfo(ArrayList<JSONObject> dataObj, LineChart lineChart, final View entireView){
         //data has been retrieved, u can hide thre progress bar
 
