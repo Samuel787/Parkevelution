@@ -641,7 +641,11 @@ public class PriceDetailFragment extends Fragment  implements OnMapReadyCallback
 
 
         for(int i=0; i<dataset.size(); i++){
-            yValues.add(new Entry(i+1, dataset.get(i)));
+            int val = dataset.get(i);
+            if(val > total_cplots){
+                val = total_cplots;
+            }
+            yValues.add(new Entry(i+1, val));
         }
 
         LineDataSet set1 = new LineDataSet(yValues, "Available Lots");
@@ -926,6 +930,9 @@ public class PriceDetailFragment extends Fragment  implements OnMapReadyCallback
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
+
+                        Log.v("Samuel", "Success-2 - testest - event is retu");
+                        Log.v("Abhishek", response.toString());
                         //get the first object
                         try {
                             //it is guarenteed that the first object exists

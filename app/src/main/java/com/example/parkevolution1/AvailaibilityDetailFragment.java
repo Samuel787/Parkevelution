@@ -666,7 +666,11 @@ public class AvailaibilityDetailFragment extends Fragment implements OnMapReadyC
 //        }
 
         for(int i=0; i<dataset.size(); i++){
-            yValues.add(new Entry(i+1, dataset.get(i)));
+            int val = dataset.get(i);
+            if(val > total_cplots){
+                val = total_cplots;
+            }
+            yValues.add(new Entry(i+1, val));
         }
 
         LineDataSet set1 = new LineDataSet(yValues, "Available Lots");

@@ -246,42 +246,24 @@ public class RecommendedFragment extends Fragment {
         //insert Abhishek's sorting algorithm for recommended carpark
 
         /**
-         *  Sorting method I
+         * Sorting method 0
          * */
-
 
         Arrays.sort(cpArray, new Comparator<CarPark>() {
             @Override
             public int compare(CarPark carPark, CarPark t1) {
-                //check for availability first
-                if(carPark.getDataCategory() == CarPark.DataCategory.HDB && t1.getDataCategory() == CarPark.DataCategory.HDB && carPark.getAvail_lots() == 0 && t1.getAvail_lots() == 0){
-                        //both have 0 availabile lots -> sort by distance
-                        if(carPark.getDist() > t1.getDist()){
-                            return 1;
-                        } else if(carPark.getDist() < t1.getDist()){
-                            return -1;
-                        } else {
-                            return 0;
-                        }
-                } else {
-                    if(carPark.getDataCategory() == CarPark.DataCategory.HDB && t1.getDataCategory() == CarPark.DataCategory.SHOPPING_MALL && carPark.getAvail_lots() == 0){
-                        //put shopping mall in front
-                        return 1;
-                    } else if(carPark.getDataCategory() == CarPark.DataCategory.SHOPPING_MALL && t1.getDataCategory() == CarPark.DataCategory.HDB && t1.getAvail_lots() == 0){
-                        //retain shopping mall in front
-                        return -1;
-                    } else if(carPark.getDist() - t1.getDist() <= 0 && carPark.getHourly_price() <= t1.getHourly_price()){
-                        //nearer and cheaper
-                        return -1; //obviously don't swap
-                    } else if(carPark.getDist() - t1.getDist() > 0 && carPark.getHourly_price() > t1.getHourly_price()){
-                        //further and more expensive
-                        return 1; //obviously swap
-                    } else if(carPark.getDist() - t1.getDist() <=0 && carPark.getHourly_price() > t1.getHourly_price() ){
+                if(carPark.getDist() - t1.getDist() <= 0 && carPark.getHourly_price() <= t1.getHourly_price()){
+                    //nearer and cheaper
+                    return -1; //obviously don't swap
+                } else if(carPark.getDist() - t1.getDist() > 0 && carPark.getHourly_price() > t1.getHourly_price()){
+                    //further and more expensive
+                    return 1; //obviously swap
+                } else if(carPark.getDist() - t1.getDist() <=0 && carPark.getHourly_price() > t1.getHourly_price() ){
                         //nearer but more expensive -> compare the opportunity cost first
                         double dist_diff = Math.abs(carPark.getDist() - t1.getDist());
-                        if(dist_diff/distance_threshold * price_threshold + t1.getHourly_price() < carPark.getHourly_price()){
+                        if(/*dist_diff/distance_threshold * price_threshold*/ (Math.pow(Math.E, dist_diff/100)) * price_threshold+ t1.getHourly_price() < carPark.getHourly_price()){
                             return 1; //swap
-                        } else if(dist_diff/distance_threshold * price_threshold + t1.getHourly_price() > carPark.getHourly_price()){
+                        } else if(/*dist_diff/distance_threshold * price_threshold*/ (Math.pow(Math.E, dist_diff/100)) * price_threshold + t1.getHourly_price() > carPark.getHourly_price()){
                             return -1; //don't swap. The cheaper price isn't worth it
                         } else {
                             return 0;
@@ -289,9 +271,9 @@ public class RecommendedFragment extends Fragment {
                     } else if(carPark.getDist() - t1.getDist() >= 0 && carPark.getHourly_price() < t1.getHourly_price()){
                         //further but cheaper
                         double dist_diff = Math.abs(carPark.getDist() - t1.getDist());
-                        if(dist_diff/distance_threshold * price_threshold + carPark.getHourly_price() < t1.getHourly_price()){
+                        if(/*dist_diff/distance_threshold * price_threshold*/ (Math.pow(Math.E, dist_diff/100)) * price_threshold + carPark.getHourly_price() < t1.getHourly_price()){
                             return 1; //swap
-                        } else if(dist_diff/distance_threshold * price_threshold + carPark.getHourly_price() > t1.getHourly_price()){
+                        } else if(/*dist_diff/distance_threshold * price_threshold*/ (Math.pow(Math.E, dist_diff/100)) * price_threshold + carPark.getHourly_price() > t1.getHourly_price()){
                             return -1; //don't swap. The cheaper price isn't worth it
                         } else {
                             return 0;
@@ -299,9 +281,70 @@ public class RecommendedFragment extends Fragment {
                     } else {
                         return 0;
                     }
-                }
             }
         });
+
+
+
+
+
+        /**
+         *  Sorting method I
+         * */
+
+
+//        Arrays.sort(cpArray, new Comparator<CarPark>() {
+//            @Override
+//            public int compare(CarPark carPark, CarPark t1) {
+//                //check for availability first
+//                if(carPark.getDataCategory() == CarPark.DataCategory.HDB && t1.getDataCategory() == CarPark.DataCategory.HDB && carPark.getAvail_lots() == 0 && t1.getAvail_lots() == 0){
+//                        //both have 0 availabile lots -> sort by distance
+//                        if(carPark.getDist() > t1.getDist()){
+//                            return 1;
+//                        } else if(carPark.getDist() < t1.getDist()){
+//                            return -1;
+//                        } else {
+//                            return 0;
+//                        }
+//                } else {
+//                    if(carPark.getDataCategory() == CarPark.DataCategory.HDB && t1.getDataCategory() == CarPark.DataCategory.SHOPPING_MALL && carPark.getAvail_lots() == 0){
+//                        //put shopping mall in front
+//                        return 1;
+//                    } else if(carPark.getDataCategory() == CarPark.DataCategory.SHOPPING_MALL && t1.getDataCategory() == CarPark.DataCategory.HDB && t1.getAvail_lots() == 0){
+//                        //retain shopping mall in front
+//                        return -1;
+//                    } else if(carPark.getDist() - t1.getDist() <= 0 && carPark.getHourly_price() <= t1.getHourly_price()){
+//                        //nearer and cheaper
+//                        return -1; //obviously don't swap
+//                    } else if(carPark.getDist() - t1.getDist() > 0 && carPark.getHourly_price() > t1.getHourly_price()){
+//                        //further and more expensive
+//                        return 1; //obviously swap
+//                    } else if(carPark.getDist() - t1.getDist() <=0 && carPark.getHourly_price() > t1.getHourly_price() ){
+//                        //nearer but more expensive -> compare the opportunity cost first
+//                        double dist_diff = Math.abs(carPark.getDist() - t1.getDist());
+//                        if(/*dist_diff/distance_threshold * price_threshold*/ (Math.pow(Math.E, dist_diff/100)) * price_threshold+ t1.getHourly_price() < carPark.getHourly_price()){
+//                            return 1; //swap
+//                        } else if(/*dist_diff/distance_threshold * price_threshold*/ (Math.pow(Math.E, dist_diff/100)) * price_threshold + t1.getHourly_price() > carPark.getHourly_price()){
+//                            return -1; //don't swap. The cheaper price isn't worth it
+//                        } else {
+//                            return 0;
+//                        }
+//                    } else if(carPark.getDist() - t1.getDist() >= 0 && carPark.getHourly_price() < t1.getHourly_price()){
+//                        //further but cheaper
+//                        double dist_diff = Math.abs(carPark.getDist() - t1.getDist());
+//                        if(/*dist_diff/distance_threshold * price_threshold*/ (Math.pow(Math.E, dist_diff/100)) * price_threshold + carPark.getHourly_price() < t1.getHourly_price()){
+//                            return 1; //swap
+//                        } else if(/*dist_diff/distance_threshold * price_threshold*/ (Math.pow(Math.E, dist_diff/100)) * price_threshold + carPark.getHourly_price() > t1.getHourly_price()){
+//                            return -1; //don't swap. The cheaper price isn't worth it
+//                        } else {
+//                            return 0;
+//                        }
+//                    } else {
+//                        return 0;
+//                    }
+//                }
+//            }
+//        });
 
 
         /**
@@ -747,6 +790,12 @@ public class RecommendedFragment extends Fragment {
                                 abhiPrice = "Free for the first hour";
                             } else if((carPark.getMall_sunday_24rate()).equals("C")){
                                 abhiPrice = "Closed during this hour";
+                            }  else if((carPark.getMall_weekday_24rate()).equals("S")){
+                                abhiPrice = "Season Parking";
+                            }else if((carPark.getMall_weekday_24rate()).equals("H")) {
+                                abhiPrice = "HDB Coupon";
+                            } else if((carPark.getMall_weekday_24rate()).equals("T")) {
+                                abhiPrice = "Tenant Only";
                             } else {
                                 abhiPrice = "Car Rate: $"+carPark.getMall_sunday_24rate()+" for the first 1hr";
                             }
@@ -820,6 +869,12 @@ public class RecommendedFragment extends Fragment {
                                 abhiPrice = "Free for the first hour";
                             } else if((carPark.getMall_saturday_24rate()).equals("C")){
                                 abhiPrice = "Closed during this hour";
+                            }  else if((carPark.getMall_weekday_24rate()).equals("S")){
+                                abhiPrice = "Season Parking";
+                            }else if((carPark.getMall_weekday_24rate()).equals("H")) {
+                                abhiPrice = "HDB Coupon";
+                            } else if((carPark.getMall_weekday_24rate()).equals("T")) {
+                                abhiPrice = "Tenant Only";
                             } else {
                                 abhiPrice = "Car Rate: $"+carPark.getMall_saturday_24rate()+" for the first 1hr";
                             }
@@ -891,6 +946,12 @@ public class RecommendedFragment extends Fragment {
                                 abhiPrice = "Free for the first hour";
                             } else if((carPark.getMall_weekday_24rate()).equals("C")){
                                 abhiPrice = "Closed during this hour";
+                            }  else if((carPark.getMall_weekday_24rate()).equals("S")){
+                                abhiPrice = "Season Parking";
+                            }else if((carPark.getMall_weekday_24rate()).equals("H")) {
+                                abhiPrice = "HDB Coupon";
+                            } else if((carPark.getMall_weekday_24rate()).equals("T")) {
+                                abhiPrice = "Tenant Only";
                             } else {
                                 abhiPrice = "Car Rate: $"+carPark.getMall_weekday_24rate()+" for the first 1hr";
                             }

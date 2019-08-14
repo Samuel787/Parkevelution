@@ -606,6 +606,12 @@ public class PriceFragment extends Fragment {
                                 abhiPrice = "Free for the first hour";
                             } else if((carPark.getMall_sunday_24rate()).equals("C")){
                                 abhiPrice = "Closed during this hour";
+                            }  else if((carPark.getMall_weekday_24rate()).equals("S")){
+                                abhiPrice = "Season Parking";
+                            }else if((carPark.getMall_weekday_24rate()).equals("H")) {
+                                abhiPrice = "HDB Coupon";
+                            } else if((carPark.getMall_weekday_24rate()).equals("T")) {
+                                abhiPrice = "Tenant Only";
                             } else {
                                 abhiPrice = "Car Rate: $"+carPark.getMall_sunday_24rate()+" for the first 1hr";
                             }
@@ -679,6 +685,12 @@ public class PriceFragment extends Fragment {
                                 abhiPrice = "Free for the first hour";
                             } else if((carPark.getMall_saturday_24rate()).equals("C")){
                                 abhiPrice = "Closed during this hour";
+                            }  else if((carPark.getMall_weekday_24rate()).equals("S")){
+                                abhiPrice = "Season Parking";
+                            }else if((carPark.getMall_weekday_24rate()).equals("H")) {
+                                abhiPrice = "HDB Coupon";
+                            } else if((carPark.getMall_weekday_24rate()).equals("T")) {
+                                abhiPrice = "Tenant Only";
                             } else {
                                 abhiPrice = "Car Rate: $"+carPark.getMall_saturday_24rate()+" for the first 1hr";
                             }
@@ -750,6 +762,12 @@ public class PriceFragment extends Fragment {
                                 abhiPrice = "Free for the first hour";
                             } else if((carPark.getMall_weekday_24rate()).equals("C")){
                                 abhiPrice = "Closed during this hour";
+                            } else if((carPark.getMall_weekday_24rate()).equals("S")){
+                                abhiPrice = "Season Parking";
+                            }else if((carPark.getMall_weekday_24rate()).equals("H")) {
+                                abhiPrice = "HDB Coupon";
+                            } else if((carPark.getMall_weekday_24rate()).equals("T")) {
+                                abhiPrice = "Tenant Only";
                             } else {
                                 abhiPrice = "Car Rate: $"+carPark.getMall_weekday_24rate()+" for the first 1hr";
                             }
