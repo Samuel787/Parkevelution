@@ -1069,7 +1069,13 @@ public class RecommendedFragment extends Fragment {
             } else if(abhiPrice.equals("C")){
                 abhiPrice = "Closed at this hour.";
             }
-            tvPrice.setText(abhiPrice);
+
+            if(abhiPrice.equals("")){
+                tvPrice.setText("No price information available at this timing");
+            } else {
+                tvPrice.setText(abhiPrice);
+            }
+
             ImageView arrow = convertView.findViewById(R.id.price_arrow);
             View mainV = convertView.findViewById(R.id.mainV_price);
 
